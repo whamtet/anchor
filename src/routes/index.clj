@@ -3,6 +3,7 @@
 
 (require '[ring.util.response :as response])
 (require '[hiccup.page :as hiccup])
+(require 'hiccup.core)
 
 (defn map-str [f & s] (apply str (interpose "\n" (apply map f s))))
 
@@ -38,6 +39,18 @@
                        })" requires shorthands)]
       (state (first classes) kvs)]))
 
+(defn injectoid-s
+  [classes kvs]
+  (hiccup.core/html (injectoid classes kvs)))
+
+(def anchor
+  [:div
+   [:a {:href "/"}
+   [:img {:src "/anchor.png"
+          :width 267
+          :height 200
+          }]]])
+
 (defn page
   "page with aforementioned snippet"
   [classes kvs]
@@ -48,11 +61,21 @@
       [:meta {:charset "UTF-8"}]
      ]
     [:body
+     anchor
      (injectoid classes kvs)
      ]
     )))
 
 (defroutes routes
-  ("/" []
+  (GET "/" []
        (hiccup/html5
-        "Excellent Dr Schmidt")))
+        anchor
+        [:h3 "Data Entry"]
+        [:a {:href "/economic-sectors"} "Economic Sectors"][:br]
+        [:a {:href "/data-entry"} "Data Entry"][:br]
+        [:a {:href "/bloomberg-data-entry"} "Bloomberg Data Entry"][:br]
+        [:h3 "Valuation"]
+        [:a {:href "/valuation-report"} "Valuation Report"][:br]
+        [:h3 "Portfolio Management"]
+        [:a {:href "/portfolio-allocation"} "Portfolio Allocation"][:br]
+        )))

@@ -1,6 +1,9 @@
 (ns anchor.model)
 (require '[anchor.db :as db])
 
+;;Here we define our financial model
+;;anchor will parse the model to generate the appropriate user interfaces
+
 (def model
   '[income-asset-value (/ net-income cap-rate)
     gross-asset-value (+ income-asset-value cash other-assets)
@@ -8,24 +11,30 @@
     new-project-value (* new-project-expenditure (- (/ new-project-return cap-rate) 1))
     fair-value (+ net-asset-value new-project-value)])
 
-(def operators '#{/ + - *})
+(defn node? [node]
+  (and
+   (not= node '-)
+   (re-find #"^[a-z\-]+$" (str node))))
 
 (defn get-nodes
   "get the nodes for a form"
   [form]
-  (clojure.set/difference
-   (set (filter symbol? (flatten form)))
-   operators))
+   (set (filter node? (flatten form))))
 
+;;all values in the model
 (def nodes (get-nodes model))
+;;map of calculated values to their dependent values
 (def dependencies
   (into {}
         (for [[k v] (partition 2 model)]
           [k (get-nodes v)])))
 
-(def output (keys dependencies))
+;;model output nodes
+(def output (set (keys dependencies)))
+;;model input nodes
 (def input (clojure.set/difference nodes output))
 
+;;function to calculate model output
 (eval
  `(defn add-output
     "adds model output to input"
@@ -48,6 +57,6 @@
 (db/dbatom manual-values "manual-values") ;company -> reporting period -> variable -> values
 (db/dbatom manual-overrides "manual-overrides") ;company -> reporting period -> variable -> type
 (db/dbatom period-coefficients "period-coefficients") ;company -> coefficients
-(db/dbatom report-metadata "report-metadata") ;company -> reporting period ->{report coefficient year month starting-year starting-month}
+(db/dbatom report-metadata "report-metadata") ;company -> reporting period -> {report coefficient year month starting-year starting-month}
 (db/dbatom economic-sectors "economic-sectors") ;sector -> cap-rate
 (db/dbatom company-sectors "company-sectors") ;company -> sector mix
