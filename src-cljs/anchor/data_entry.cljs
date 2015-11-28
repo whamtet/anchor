@@ -42,7 +42,7 @@
   (let [
         time-gap (- (* 2020 12) month (* year 12))
         time-width (inc (- (+ month (* year 12)) starting-month (* starting-year 12)))
-        scale 1
+        scale 4
         reporting-period (str year " " month)
         ]
     (println time-width time-gap)
@@ -55,13 +55,18 @@
               :on-click #(delete-report company reporting-period)}]
      [:div {:style {:width (dec (* scale time-width))
                     :left (* scale time-gap)
-                    :position "fixed"
+                    :position "relative"
+                    :height 17
+                    :top -15
                     :border "1px solid black"
                     :background-color "yellow"}}]]))
 
 (defn company-div [company reporting-periods]
   [:div
-   [:b company] " "
+   [:a {:href
+        (core/url "/program-graph" {:company company})
+        :target "_blank"}
+        [:b company]] " "
    [:input {:type "button"
             :value "Delete"
             :on-click #(delete-company company reporting-periods)}][:br][:br]

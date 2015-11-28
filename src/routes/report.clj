@@ -34,7 +34,10 @@
   (GET "/report" [company reporting-period]
        (let [
              s (slurp "resources/public/pdf.js/web/viewer.html")
-             input (disj model/input 'cap-rate)
+             input (map str model/manual-input)
+             input (if-let [node-order @model/node-order]
+                     (sort-by #(node-order % 0) input)
+                     input)
              ]
          (util/response
            (.replace s "matty"
@@ -44,6 +47,14 @@
                                  "reporting_period" (pr-str reporting-period)
                                  "inputs" (pr-str input)
                                  "report_values" (pr-str (get-in @model/report-values [company reporting-period]))
+                                 "report_metadata" (pr-str (get-in @model/report-metadata [company reporting-period]))
                                  })))))
-
+  (POST "/update-report-values" [company reporting-period report-values]
+        (swap! model/report-values assoc-in [company reporting-period] (util/clean report-values))
+        (model/set-report-values)
+        util/ok-response)
+  (POST "/update-report-metadata2" [company reporting-period report-metadata]
+        (swap! model/report-metadata assoc-in [company reporting-period] (util/clean report-metadata))
+        (model/set-report-metadata)
+        util/ok-response)
   )

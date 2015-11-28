@@ -16,6 +16,9 @@
                  [rhizome "0.2.5"] ;graphing
                  [hiccup "1.0.5"]
 
+                 ;yahoo finance
+                 [com.yahoofinance-api/YahooFinanceAPI "2.0.0"]
+
                  ;;cljs
                  [org.clojure/clojurescript "1.7.28"]
                  [crate "0.2.4"]

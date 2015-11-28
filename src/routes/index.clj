@@ -78,4 +78,6 @@
         [:a {:href "/valuation-report"} "Valuation Report"][:br]
         [:h3 "Portfolio Management"]
         [:a {:href "/portfolio-allocation"} "Portfolio Allocation"][:br]
+        [:h3 "Settings"]
+        [:a {:href "/settings"} "Settings"]
         )))

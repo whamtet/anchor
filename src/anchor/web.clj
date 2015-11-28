@@ -11,7 +11,9 @@
             [routes.sectors :as sectors]
             [routes.data-entry :as data-entry]
             [routes.report :as report]
+            [routes.program-graph :as program-graph]
             [ring.middleware.edn :as wrap-edn]
+            [routes.settings :as settings]
             ))
 
 (defroutes app
@@ -26,6 +28,8 @@
           #'sectors/routes
           #'data-entry/routes
           #'report/routes
+          #'settings/routes
+          #'program-graph/routes
           app
            ))
 
