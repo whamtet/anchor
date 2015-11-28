@@ -17,6 +17,8 @@
             ))
 
 (defroutes app
+  (GET "/test" []
+       (index/page ["test"] {}))
   (route/resources "/")
   (ANY "*" []
        (route/not-found (slurp (io/resource "404.html")))))

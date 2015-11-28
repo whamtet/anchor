@@ -3,56 +3,21 @@
    [ajax.core :refer [GET POST]]
    [reagent.core :as reagent :refer [atom]]
    [anchor.core :as core]
+   [crate.core :as crate]
    ))
 
 (def field (atom nil))
 (def show-metadata? (atom false))
-
-(defn color-element [element type]
-  (let [style (.-style element)]
-    (set! (.-backgroundColor style) (if (= :clear type) "" "white"))
-    (set! (.-color style)
-          ({:clear ""
-            :negative "red"
-            :positive "green"} type))))
 
 (defn elements-on-page [page-index]
   (array-seq
    (js/$ (core/format "#pageContainer%s > .textLayer > div" page-index))))
 
 (defn set-field [input]
-  ;clear old fields
-  (doseq [[page selected] (get @report-values @field)
-          :let [
-                elements (elements-on-page page)
-                ]
-          :when (not-empty elements)
-          [index] selected]
-    (color-element (nth elements (int index)) :clear))
-
-  (reset! field input)
-
-  ;set new fields
-  (doseq [[page selected] (get @report-values @field)
-          :let [
-                elements (elements-on-page page)
-                ]
-          :when (not-empty elements)
-          [index {negative? "negative?"}] selected]
-    (color-element
-     (nth elements (int index))
-     (if negative? :negative :positive))))
+  (reset! field input))
 
 (defn clear-field [to-clear]
   (swap! report-values dissoc to-clear)
-  (if (= @field to-clear)
-    (doseq [[page selected] (get @report-values @field)
-            :let [
-                  elements (elements-on-page page)
-                  ]
-            :when (not-empty elements)
-            [index] selected]
-      (color-element (nth elements (int index)) :clear)))
   (POST "/update-report-values" {:params {:company @company
                                           :reporting-period @reporting-period
                                           :report-values @report-values}}))
@@ -62,7 +27,8 @@
         {t true f false}
         (group-by identity
                   (for [[page indices] (get @report-values input)
-                        [index {negative? "negative?"}] indices]
+                        [index subindices] indices
+                        [subindex {negative? "negative?"}] subindices]
                     negative?))
         num-negative (count t)
         num-positive (count f)
@@ -84,36 +50,31 @@
                :on-click #(clear-field input)}]
       ]]))
 
+(defn metadata-listener [k]
+  #(do
+     (swap! report-metadata assoc k (-> % .-target .-value))
+     (POST "/update-report-metadata2" {:params {:report-metadata @report-metadata
+                                                :company @company
+                                                :reporting-period @reporting-period}})))
+
 (defn metadata-form []
   [:div
    [:p "Metadata"]
    "Starting Year "
    [:select {:value (get @report-metadata "starting-year")
-             :on-change #(do
-                           (swap! report-metadata assoc "starting-year" (-> % .-target .-value))
-                           (POST "/update-report-metadata2" {:params {:report-metadata @report-metadata
-                                                                      :company @company
-                                                                      :reporting-period @reporting-period}}))}
+             :on-change (metadata-listener "starting-year")}
     (for [year (range 2000 2020)]
       ^{:key year}
       [:option year])]
    " Starting Month "
    [:select {:value (get @report-metadata "starting-month")
-             :on-change #(do
-                           (swap! report-metadata assoc "starting-month" (-> % .-target .-value))
-                           (POST "/update-report-metadata2" {:params {:report-metadata @report-metadata
-                                                                      :company @company
-                                                                      :reporting-period @reporting-period}}))}
+             :on-change (metadata-listener "starting-month")}
     (for [month (range 1 13)]
       ^{:key month}
       [:option month])]
    " Factor "
    [:select {:value (get @report-metadata "factor")
-             :on-change #(do
-                           (swap! report-metadata assoc "factor" (-> % .-target .-value))
-                           (POST "/update-report-metadata2" {:params {:report-metadata @report-metadata
-                                                                      :company @company
-                                                                      :reporting-period @reporting-period}}))}
+             :on-change (metadata-listener "factor")}
     [:option "1"]
     [:option "k"]
     [:option "M"]][:br]
@@ -126,7 +87,7 @@
   [metadata-form]
   [:div
    {:style {:background-color "white"
-            :width "25%"
+            :width "18%"
             :z-index 100000
             :position "relative"
             :padding 7
@@ -147,50 +108,54 @@
           ^{:key input}
           [field-row input])]]])])
 
-(defn click-div [page element-num event]
+(defn click-div [page element-num subelement-num word]
   (let [
-        element (.-target event)
-        text (.-textContent element)
-        style (.-style element)
-        {negative? "negative?" :as x} (get-in @report-values [@field (str page) (str element-num)])
+        {negative? "negative?" :as x} (get-in @report-values [@field (str page) (str element-num) (str subelement-num)])
         ]
     (cond
      negative?
-     (do
-       (color-element element :clear)
-       (swap! report-values core/dissoc-in [@field (str page) (str element-num)])
-       )
+     (swap! report-values core/dissoc-in [@field (str page) (str element-num) (str subelement-num)])
      x
-     (do
-       (color-element element :negative)
-       (swap! report-values assoc-in [@field (str page) (str element-num) "negative?"] true)
-       )
+     (swap! report-values assoc-in [@field (str page) (str element-num) (str subelement-num) "negative?"] true)
      :default
-     (do
-       (color-element element :positive)
-       (swap! report-values assoc-in [@field (str page) (str element-num)] {"value" text "negative?" false})))
+     (swap! report-values assoc-in [@field (str page) (str element-num) (str subelement-num)] {"value" word "negative?" false}))
     (POST "/update-report-values" {:params {:company @company
                                             :reporting-period @reporting-period
                                             :report-values @report-values}})
     ))
 
-(defn add-click-listeners [page-index]
+(defn snippetlet [page-num element-num subelement-num word]
   (let [
-        existing-selectors (get-in @report-values [@field (str page-index)])
+        {:strs [value negative?]} (get-in @report-values [@field (str page) (str element-num) (str subelement-num)])
         ]
+    [:span
+     {:style {:background-color (if value "white")
+              :color (cond negative? "red" value "green")}
+      :on-click #(click-div page-num element-num subelement-num word)} word]))
+
+(defn snippet [page-num element-num sentence]
+  (let [
+        words (.split sentence " ")
+        ]
+    [:span
+     (for [[j word] (map vector (range) (butlast words))]
+       ^{:key j}
+       [snippetlet page-num element-num j (str word core/space)])
+     [snippetlet page-num element-num (dec (count words)) (last words)]]))
+
+(defn add-click-listeners [page-index]
     ;get rid of that annoying opacity
     (.css (js/$ (core/format "#pageContainer%s > .textLayer" page-index)) "opacity" 1)
     (dorun
-     (map-indexed (fn [i element]
-                    ;color new fields already selected
-                    (if-let [{negative? "negative?"} (get existing-selectors (str i))]
-                      (color-element element (if negative? :negative :positive)))
-                    ;listener
-                    (set! (.-onclick element) #(click-div page-index i %)))
-                  (elements-on-page page-index)))))
+     (map-indexed (fn [element-num element]
+                    (when (re-find #"\d" (.-textContent element))
+                      (reagent/render-component
+                       [snippet page-num element-num (.-textContent element)]
+                       element)))
+                  (elements-on-page page-index))))
 
 (defn main []
   (reset! field (first @inputs))
   (js/document.addEventListener "textlayerrendered" #(-> % .-detail .-pageNumber add-click-listeners))
-  (js/$ #(js/loadFile "/pdf.js/web/KepREIT_AR2014_Full_Report.pdf"))
+  (js/$ #(js/loadFile (core/format "/reports/%s/%s.pdf" @company @reporting-period)))
   (core/page content))

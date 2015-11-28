@@ -7,3 +7,5 @@
   [stocks]
   (let [data (yahoofinance.YahooFinance/get (into-array stocks))]
     (map #(-> (get data %) .getQuote .getPrice) stocks)))
+
+(def prices2 (memoize prices))

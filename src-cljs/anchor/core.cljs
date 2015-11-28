@@ -1,7 +1,11 @@
 (ns anchor.core
-  (:require [reagent.core :as reagent]))
+  (:require [reagent.core :as reagent]
+            [goog.string :as gstring]
+            ))
 
 (enable-console-print!)
+
+(def space (gstring/unescapeEntities "&nbsp;"))
 
 (def bind-variable
   (js/Function. "klass" "k"
@@ -12,8 +16,7 @@
 
 (defn page [contents]
   (reagent/render-component
-   [:div {:id "content"}
-    [contents]]
+   [contents]
    (js/document.getElementById "content")))
 
 (defn p [x]

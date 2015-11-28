@@ -15,12 +15,14 @@
        (index/page ["new_report"] {
                                    "company" (pr-str company)
                                    }))
-  (POST "/new-report" [company year month starting-year starting-month file factor]
+  (POST "/new-report" [company year month starting-year starting-month file factor url]
         (let [
               [year month starting-year starting-month]
               (map #(Integer/parseInt %)
                    [year month starting-year starting-month])
-              {file :tempfile} file
+              file (if (empty? url)
+                     (:tempfile file)
+                     url)
               outfile (File. (format "resources/public/reports/%s/%s %s.pdf" company year month))
               parent-dir (File. (format "resources/public/reports/%s" company))
               reporting-period (str year " " month)

@@ -71,3 +71,4 @@
 (db/dbatom economic-sectors "economic-sectors") ;sector -> cap-rate
 (db/dbatom company-sectors "company-sectors") ;company -> sector mix
 (db/dbatom node-order "node-order")
+(db/dbatom node-types "node-types")

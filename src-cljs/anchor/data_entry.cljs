@@ -45,7 +45,6 @@
         scale 4
         reporting-period (str year " " month)
         ]
-    (println time-width time-gap)
     [:div
      [:a {:href (core/url "/report" {:company company :reporting-period reporting-period})
           :target "_blank"}
@@ -80,13 +79,12 @@
    (for [[reporting-period {:strs [year month starting-year starting-month]}] reporting-periods]
      ^{:key (str year month)}
      [report-line company year month starting-year starting-month])
-   [:br]
    [:input {
             :type "button"
             :value "New Report"
             :on-click #(core/link-to "/new-report" {:company company} true)
             }]
-   [:br]
+   [:br][:br]
    ])
 
 (defn content []

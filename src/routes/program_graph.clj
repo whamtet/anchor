@@ -28,5 +28,4 @@
                                       "graph" (pr-str clj-graph)
                                       "automatic_input" (pr-strs model/automatic-input)
                                       "manual_input" (pr-strs model/manual-input)
-
                                       })))

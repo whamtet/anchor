@@ -25,11 +25,8 @@
       (POST "/update-node-order" {:params {:node-order (zipmap @sorted-inputs (range))}})
       )))
 
-(defn content []
-  (let [
-        num-inputs (count @sorted-inputs)
-        ]
-    [:div
+(defn input-order []
+  [:div
      [:h3 "Input Order"]
      [:table
       [:tbody
@@ -54,7 +51,33 @@
             :on-drag-start #(reset! from input)
             :on-drop rearrange
             }
-           input]])]]]))
+           input]])]]])
+
+(defn input-selector [input]
+  [:select {:value (get @node-types input "Income Statement")
+            :on-change #(do
+                          (swap! node-types assoc input (-> % .-target .-value))
+                          (POST "/update-node-types" {:params {:node-types @node-types}}))}
+   [:option "Income Statement"]
+   [:option "Balance Sheet"]])
+
+(defn input-types-selector []
+  [:div
+   [:h3 "Input Types"]
+   [:table
+    [:tbody
+     (for [input @sorted-inputs]
+       ^{:key input}
+       [:tr
+        [:td input]
+        [:td
+        [input-selector input]]])]]
+   ])
+
+(defn content []
+  [:div
+   [input-order]
+   [input-types-selector]])
 
 (defn main []
   (reset! sorted-inputs

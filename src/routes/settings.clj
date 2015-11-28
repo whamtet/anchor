@@ -10,8 +10,7 @@
        (index/page ["settings"] {
                                  "node_order" (pr-str @model/node-order)
                                  "input" (pr-str (map str model/manual-input))
+                                 "node_types" (pr-str @model/node-types)
                                  }))
-  (POST "/update-node-order" [node-order]
-        (reset! model/node-order (util/clean node-order))
-        (model/set-node-order)
-        util/ok-response))
+  (util/defupdate node-order)
+  (util/defupdate node-types))
