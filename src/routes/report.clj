@@ -50,9 +50,12 @@
                                  "inputs" (pr-str input)
                                  "report_values" (pr-str (get-in @model/report-values [company reporting-period]))
                                  "report_metadata" (pr-str (get-in @model/report-metadata [company reporting-period]))
+                                 "report_manuals" (pr-str (get-in @model/report-manuals [company reporting-period]))
                                  })))))
-  (POST "/update-report-values" [company reporting-period report-values]
+  (POST "/update-report-values" [company reporting-period report-values report-manuals]
         (swap! model/report-values assoc-in [company reporting-period] (util/clean report-values))
+        (swap! model/report-manuals assoc-in [company reporting-period] (util/clean report-manuals))
+        (model/set-report-manuals)
         (model/set-report-values)
         util/ok-response)
   (POST "/update-report-metadata2" [company reporting-period report-metadata]

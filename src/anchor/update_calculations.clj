@@ -11,6 +11,17 @@
       (.replace s to-remove ""))
     value ["," "(" ")"])))
 
+(defn parse-values [values]
+  (reduce + (map parse-values (remove empty? (.split values " ")))))
+
+(defn manual-overrides [company reporting-period factor]
+  (let [
+        factor (* factor
+                  ({"1" 1 "k" 1000 "M" 1000000} (get-in @model/report-metadata [company reporting-period "factor"])))
+        ]
+    (util/value-map #(* factor (parse-values %))
+                    (get-in @model/report-manuals [company reporting-period]))))
+
 (defn get-values-at [company reporting-period factor]
   (let [
         factor (* factor
@@ -36,7 +47,9 @@
         sorted-reporting-periods (sort-by date-value (keys (get @model/report-metadata company)))
 
         values (map #(get-values-at company %1 %2) sorted-reporting-periods factors)
-        reduced-values (reduce #(merge-with + %1 %2) values)
+        values2 (map #(manual-overrides company %1 %2) sorted-reporting-periods factors)
+        values (map #(merge-with + %1 %2) values values2)
+        reduced-values (if (not-empty values) (reduce #(merge-with + %1 %2) values))
         ]
     (into {}
           (for [[k v] reduced-values]
@@ -56,10 +69,12 @@
 (defn inputs [companies]
   (let [
         manual-values (map manual-values companies)
-        cap-rates (zipmap companies (map (fn [company] {"cap-rate" (cap-rate company)}) companies))
+        cap-rates (map cap-rate companies)
         share-prices (yahoo/prices2 companies)
-        share-prices (zipmap companies (map (fn [price] {"share-price" price}) share-prices))
         ]
-    (merge-with merge manual-values cap-rates share-prices)))
+    (zipmap companies
+            (map (fn [manual cap-rate share-price]
+                   (assoc manual "cap-rate" cap-rate "share-price" share-price))
+                 manual-values cap-rates share-prices))))
 
-(println (inputs ["Ocean"]))
+(println (inputs ["INTC"]))

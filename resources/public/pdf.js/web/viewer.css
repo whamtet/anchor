@@ -20,7 +20,11 @@
   right: 0;
   bottom: 0;
   overflow: hidden;
-  opacity: 0.2;
+/*  opacity: 0.2; */
+}
+
+#findBar {
+  zIndex: 1000000;
 }
 
 .textLayer > div {

@@ -1,6 +1,9 @@
 (ns anchor.util)
 (require 'clojure.walk)
 
+(defn dissoc-in [m v]
+  (update-in m (pop v) dissoc (peek v)))
+
 (def clean clojure.walk/stringify-keys)
 (def ok-response {:body "ok"
                   :status 200

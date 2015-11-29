@@ -16,11 +16,16 @@
 (defn set-field [input]
   (reset! field input))
 
-(defn clear-field [to-clear]
-  (swap! report-values dissoc to-clear)
+(defn update-report-values []
   (POST "/update-report-values" {:params {:company @company
                                           :reporting-period @reporting-period
-                                          :report-values @report-values}}))
+                                          :report-values @report-values
+                                          :report-manuals @report-manuals}}))
+
+(defn clear-field [to-clear]
+  (swap! report-values dissoc to-clear)
+  (swap! report-manuals dissoc to-clear)
+  (update-report-values))
 
 (defn field-row [input]
   (let [
@@ -47,7 +52,12 @@
         [:span {:style {:color "red"}} "(" num-negative ")"])
       [:input {:type "button"
                :value "Clear"
-               :on-click #(clear-field input)}]
+               :on-click #(clear-field input)}] [:br]
+
+      [:input {:type "input"
+               :value (get @report-manuals input "")
+               :on-change #(swap! report-manuals assoc input (-> % .-target .-value))
+               :on-blur update-report-values}]
       ]]))
 
 (defn metadata-listener [k]
@@ -109,6 +119,7 @@
           [field-row input])]]])])
 
 (defn click-div [page element-num subelement-num word]
+  (println "clickz" page element-num subelement-num word)
   (let [
         {negative? "negative?" :as x} (get-in @report-values [@field (str page) (str element-num) (str subelement-num)])
         ]
@@ -119,19 +130,21 @@
      (swap! report-values assoc-in [@field (str page) (str element-num) (str subelement-num) "negative?"] true)
      :default
      (swap! report-values assoc-in [@field (str page) (str element-num) (str subelement-num)] {"value" word "negative?" false}))
-    (POST "/update-report-values" {:params {:company @company
-                                            :reporting-period @reporting-period
-                                            :report-values @report-values}})
+    (update-report-values)
     ))
+
+(defn has-num? [word]
+  (re-find #"\d" word))
 
 (defn snippetlet [page-num element-num subelement-num word]
   (let [
         {:strs [value negative?]} (get-in @report-values [@field (str page) (str element-num) (str subelement-num)])
         ]
     [:span
+     (if (has-num? word)
      {:style {:background-color (if value "white")
               :color (cond negative? "red" value "green")}
-      :on-click #(click-div page-num element-num subelement-num word)} word]))
+      :on-click #(click-div page-num element-num subelement-num word)}) word]))
 
 (defn snippet [page-num element-num sentence]
   (let [
@@ -144,13 +157,11 @@
      [snippetlet page-num element-num (dec (count words)) (last words)]]))
 
 (defn add-click-listeners [page-index]
-    ;get rid of that annoying opacity
-    (.css (js/$ (core/format "#pageContainer%s > .textLayer" page-index)) "opacity" 1)
     (dorun
      (map-indexed (fn [element-num element]
-                    (when (re-find #"\d" (.-textContent element))
+                    (when (has-num? (.-textContent element))
                       (reagent/render-component
-                       [snippet page-num element-num (.-textContent element)]
+                       [snippet page-index element-num (.-textContent element)]
                        element)))
                   (elements-on-page page-index))))
 

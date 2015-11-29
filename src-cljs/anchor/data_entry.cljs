@@ -31,12 +31,13 @@
     (js/alert "Delete Reports First")
     (do
       (swap! report-metadata dissoc company)
-      (POST "/update-report-metadata" {:params {:report-metadata @report-metadata}}))))
+      (POST "/delete-company" {:params {:company company}}))))
 
 (defn delete-report [company reporting-period]
   (when (js/confirm (core/format "Delete %s %s ?" company reporting-period))
     (swap! report-metadata core/dissoc-in [company reporting-period])
-    (POST "/update-report-metadata" {:params {:report-metadata @report-metadata}})))
+    (POST "/update-report-metadata" {:params {:report-metadata @report-metadata}})
+    ))
 
 (defn report-line [company year month starting-year starting-month]
   (let [

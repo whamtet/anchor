@@ -5,12 +5,30 @@
             [anchor.util :as util]
             ))
 
+(defmacro delete-company [& atoms]
+  `(do
+     ~@(for [atom atoms]
+         `(swap! ~(symbol "model" (str atom)) dissoc ~'company))
+     ~@(for [atom atoms]
+         `(~(symbol "model" (str "set-" atom))))
+     util/ok-response))
+
 (defroutes routes
   (GET "/data-entry" []
        (index/page ["data_entry"] {
                                    "report_metadata" (pr-str @model/report-metadata)
                                    "period_coefficients" (pr-str @model/period-coefficients)
                                    }))
+  (POST "/delete-report" [company reporting-period]
+        (swap! model/report-metadata util/dissoc-in [company reporting-period])
+        (swap! model/report-values util/dissoc-in [company reporting-period])
+        (swap! model/report-manuals util/dissoc-in [company reporting-period])
+        (model/set-report-metadata)
+        (model/set-report-values)
+        (model/set-report-manuals)
+        util/ok-response)
+  (POST "/delete-company" [company]
+        (delete-company report-metadata report-values report-manuals company-sectors))
   (util/defupdate report-metadata)
   (util/defupdate period-coefficients)
   )
