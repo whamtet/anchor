@@ -32,7 +32,8 @@
             [field
              (reduce +
                      (for [[page items] pages
-                           [item {:strs [negative? value]}] items
+                           [item subitems] items
+                           [subitem {:strs [negative? value]}] subitems
                            :when value
                            :let [value (* factor (parse-value value))]]
                        (if negative? (- value) value)))]))))
@@ -64,17 +65,19 @@
         ]
     (/
      (reduce + (map (fn [[sector proportion]] (* proportion (get @model/economic-sectors sector))) proportion))
-     (reduce + (vals proportion)))))
+     (reduce + (vals proportion))
+     100
+     )))
 
 (defn inputs [companies]
   (let [
         manual-values (map manual-values companies)
         cap-rates (map cap-rate companies)
-        share-prices (yahoo/prices2 companies)
+        yahoo-data (yahoo/data2 companies)
         ]
     (zipmap companies
-            (map (fn [manual cap-rate share-price]
-                   (assoc manual "cap-rate" cap-rate "share-price" share-price))
-                 manual-values cap-rates share-prices))))
+            (map (fn [manual cap-rate yahoo-data]
+                   (assoc (merge manual yahoo-data) "cap-rate" cap-rate))
+                 manual-values cap-rates yahoo-data))))
 
 (println (inputs ["INTC"]))

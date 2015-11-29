@@ -11,7 +11,8 @@
                  [environ "0.5.0"]
                  [com.cemerick/drawbridge "0.0.6"]
                  [fogus/ring-edn "0.3.0"]
-                 [com.novemberain/monger "2.1.0"]
+;                 [com.novemberain/monger "2.1.0"]
+                 [com.novemberain/monger "3.0.0-rc2"]
                  [clojure-msgpack "1.0.0"]
                  [rhizome "0.2.5"] ;graphing
                  [hiccup "1.0.5"]

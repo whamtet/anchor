@@ -23,9 +23,10 @@
 /*  opacity: 0.2; */
 }
 
-#findBar {
-  zIndex: 1000000;
+#findbar {
+  z-index: 1000000;
 }
+
 
 .textLayer > div {
   color: transparent;

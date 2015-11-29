@@ -42,6 +42,17 @@
 (defn dissoc-in [m v]
   (update-in m (pop v) dissoc (peek v)))
 
+(defn dissoc-in-all [m v]
+  (condp = (count v)
+    0 m
+    1 (dissoc m (peek v))
+    (let [
+          cleaned (dissoc (get-in m (pop v)) (peek v))
+          ]
+      (if (empty? cleaned)
+        (recur m (pop v))
+        (assoc-in m (pop v) cleaned)))))
+
 (defn replace-all [a b c]
   (loop [a a]
     (if (= -1 (.indexOf a b)) a (recur (.replace a b c)))))

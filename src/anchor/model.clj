@@ -11,13 +11,13 @@
     new-project-value (* new-project-expenditure (- (/ new-project-return cap-rate) 1))
     fair-value (+ net-asset-value new-project-value)
 
-    market-cap (* shares-issued share-price)
+    market-cap (* shares-outstanding share-price)
     nav-discount (- (/ market-cap net-asset-value) 1)
     fair-value-discount (- (/ market-cap fair-value) 1)
     ])
 
 ;;which variables are calculated automatically
-(def automatic-input '#{cap-rate share-price})
+(def automatic-input '#{cap-rate share-price shares-outstanding})
 
 (defn node? [node]
   (and

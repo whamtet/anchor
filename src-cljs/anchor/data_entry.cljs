@@ -53,7 +53,7 @@
      [:input {:type "button"
               :value "Delete"
               :on-click #(delete-report company reporting-period)}]
-     [:div {:style {:width (dec (* scale time-width))
+     [:div {:style {:width (- (* scale time-width) 2)
                     :left (* scale time-gap)
                     :position "relative"
                     :height 17
@@ -61,41 +61,54 @@
                     :border "1px solid black"
                     :background-color "yellow"}}]]))
 
-(defn company-div [company reporting-periods]
-  [:div
-   [:a {:href
-        (core/url "/program-graph" {:company company})
-        :target "_blank"}
-        [:b company]] " "
-   [:input {:type "button"
-            :value "Delete"
-            :on-click #(delete-company company reporting-periods)}][:br][:br]
-   "Report Combination "
-   [:input {:type "text"
-            :default-value (get @period-coefficients company)
-            :on-blur #(do
-                        (swap! period-coefficients assoc company (-> % .-target .-value))
-                        (POST "/update-period-coefficients" {:params {:period-coefficients @period-coefficients}}))
-                        }] [:br] [:br]
-   (for [[reporting-period {:strs [year month starting-year starting-month]}] reporting-periods]
-     ^{:key (str year month)}
-     [report-line company year month starting-year starting-month])
-   [:input {
-            :type "button"
-            :value "New Report"
-            :on-click #(core/link-to "/new-report" {:company company} true)
-            }]
-   [:br][:br]
-   ])
+(defn date-val [[reporting-period]]
+  (let [
+        [year month] (map int (.split reporting-period " "))
+        ]
+    (- 0 year (/ month 12))))
+
+(defn company-div [company]
+  (let [
+        reporting-periods (get @report-metadata company)
+        ]
+    [:div
+     [:a {:href
+          (core/url "/program-graph" {:company company})
+          :target "_blank"}
+      [:b company]] " "
+     [:input {:type "button"
+              :value "Delete"
+              :on-click #(delete-company company reporting-periods)}][:br][:br]
+     "Report Combination "
+     [:input {:type "text"
+              :default-value (get @period-coefficients company)
+              :on-blur #(do
+                          (swap! period-coefficients assoc company (-> % .-target .-value))
+                          (POST "/update-period-coefficients" {:params {:period-coefficients @period-coefficients}}))
+              }] [:br] [:br]
+     (for [[reporting-period {:strs [year month starting-year starting-month]}]
+           (sort-by date-val reporting-periods)]
+       ^{:key (str year month)}
+       [report-line company year month starting-year starting-month])
+     [:input {
+              :type "button"
+              :value "New Report"
+              :on-click #(core/link-to "/new-report" {:company company} true)
+              }]
+     [:br][:br]
+     ]))
+
+(defn sort-companies [companies]
+  (mapcat sort (vals (group-by #(second (.split % ".")) companies))))
 
 (defn content []
   [:div
    [:h2 "Data Entry"]
    [new-company-form]
    [:h3 "Companies"]
-   (for [[company reporting-periods] @report-metadata]
+   (for [company (sort-companies (keys @report-metadata))]
      ^{:key company}
-     [company-div company reporting-periods])
+     [company-div company])
    ])
 
 (defn main []

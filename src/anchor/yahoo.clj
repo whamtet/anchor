@@ -2,10 +2,14 @@
 
 (def stocks ["INTC", "BABA", "TSLA", "AIR.PA", "YHOO"])
 
-(defn prices
-  "prices for stocks"
+(defn data
+  "data for stocks"
   [stocks]
   (let [data (yahoofinance.YahooFinance/get (into-array stocks))]
-    (map #(-> (get data %) .getQuote .getPrice) stocks)))
+    (map #(let [
+                data (get data %)
+                ]
+            {"price" (-> data .getQuote .getPrice)
+             "shares-outstanding" (-> data .getStats .getSharesOutstanding)}) stocks)))
 
-(def prices2 (memoize prices))
+(def data2 (memoize data))
