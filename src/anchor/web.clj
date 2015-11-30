@@ -14,6 +14,7 @@
             [routes.program-graph :as program-graph]
             [ring.middleware.edn :as wrap-edn]
             [routes.settings :as settings]
+            [routes.bberg :as bberg]
             ))
 
 (defroutes app
@@ -32,6 +33,7 @@
           #'report/routes
           #'settings/routes
           #'program-graph/routes
+          #'bberg/routes
           app
            ))
 

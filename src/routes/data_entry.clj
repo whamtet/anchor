@@ -3,6 +3,7 @@
             [routes.index :as index]
             [anchor.model :as model]
             [anchor.util :as util]
+            [anchor.yahoo :as yahoo]
             ))
 
 (defmacro delete-company [& atoms]
@@ -18,6 +19,7 @@
        (index/page ["data_entry"] {
                                    "report_metadata" (pr-str @model/report-metadata)
                                    "period_coefficients" (pr-str @model/period-coefficients)
+                                   "company_names" (pr-str (yahoo/company-names (keys @model/report-metadata)))
                                    }))
   (POST "/delete-report" [company reporting-period]
         (swap! model/report-metadata util/dissoc-in [company reporting-period])

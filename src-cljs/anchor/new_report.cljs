@@ -41,7 +41,7 @@
     "Starting Year "
     [:select {:value @starting-year
               :name "starting-year"
-              :on-change #(reset! starting-year (-> % .-target .-value))
+              :on-change #(reset! starting-year (-> % .-target .-value js/Number))
               }
      (for [year (range 2000 2020)]
        ^{:key year}
@@ -49,7 +49,7 @@
     " Starting Month "
     [:select {:value @starting-month
               :name "starting-month"
-              :on-change #(reset! starting-month (-> % .-target .-value))
+              :on-change #(reset! starting-month (-> % .-target .-value js/Number))
               }
      (for [month (range 1 13)]
        ^{:key month}
@@ -57,7 +57,7 @@
     " Year "
     [:select {:value @year
               :name "year"
-              :on-change #(reset! year (-> % .-target .-value))
+              :on-change #(reset! year (-> % .-target .-value js/Number))
               }
      (for [year (range 2000 2020)]
        ^{:key year}
@@ -65,7 +65,7 @@
     " Month"
     [:select {:value @month
               :name "month"
-              :on-change #(reset! month (-> % .-target .-value))
+              :on-change #(reset! month (-> % .-target .-value js/Number))
               }
      (for [month (range 1 13)]
        ^{:key month}

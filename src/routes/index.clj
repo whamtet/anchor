@@ -31,7 +31,7 @@
       [:script {:src "/cljs/out.js"}]
       [:script {:src "/react-0.12.0.js"}]
       [:script (format "
-                       goog.require('anchor.core')
+                       goog.require('cljs.reader')
                        %s
                        $(function() {
                        c = anchor.core
@@ -73,7 +73,7 @@
         [:h3 "Data Entry"]
         [:a {:href "/economic-sectors"} "Economic Sectors"][:br]
         [:a {:href "/data-entry"} "Data Entry"][:br]
-        [:a {:href "/bloomberg-data-entry"} "Bloomberg Data Entry"][:br]
+        [:a {:href "/bberg"} "Bloomberg Data Entry"][:br]
         [:h3 "Valuation"]
         [:a {:href "/valuation-report"} "Valuation Report"][:br]
         [:h3 "Portfolio Management"]

@@ -1,0 +1,246 @@
+{NORMALIZED_INCOME
+"
+    Normalized Income NORMALIZED_INCOME RX062 182.15
+        Inc Bef XO Less Minority Interest & Pref Dvd INC_BEF_XO_LESS_MIN_INT_PREF_DVD RR092 545.03
+        Income bef XO items IS_INC_BEF_XO_ITEM IS040 545.03
+        Operating Income IS_OPER_INC IS033 159.14
+            Revenue SALES_REV_TURN IS010 790.39
+        Rental Income IS_RENT_INC IS030 688.22
+            Rental Income ARDR_RENTAL_INC R0626 688.22
+            Room rentals 133,869.00
+                Property rentals 554,353.00
+                Income from REO IS_COMM_AND_FEE_EARN_INC_REO IS019 0.00
+                RE equity interests IS_OTHER_OPER_INC_LOSSES IS020 102.17
+                Other Property Income ARDR_OTHER_PROPERTY_INCOME R4329 102.17
+                    Others 7,563.00
+                Food and beverages 94,606.00
+                Net operating expenses IS_NET_OPER_EXP IS059 631.25
+                    Real est oper exp PRPTY_OPER_EXP IS044 295.71
+                    Real Estate Tax Expense ARD_RE_TAX_EXP A0821 152.00
+                    Real estate tax 74,555.00
+                    Business tax, urban construction and maintenance t... 47,066.00
+                    Withholding tax (ii) 30,383.00
+                    Litigation Expense ARD_LITIGATION_EXP A0520 10.70
+                    Legal and professional fee 10,696.00
+                    Other Property Operating Expense ARD_OTH_PROPERTY_OPERATING_EXP A0826 4.42
+                        Valuation fee 618.00
+                    Trustee’s fee 3,804.00
+                    Management/Advisory Expense ARDR_MANAGEMENT_ADVISORY_EXP R0822 70.44
+                        Property management fee (i) 17,581.00
+                    Manager’s fee (Note 8) 52,857.00
+                    Salaries Wages and Employee Benefits ARD_SALARIES_WAGE_EMPLOYEE_BEN A0008 58.15
+                Employee benefit expense 58,153.00
+                Gen / admin exp IS_GNRL_AND_ADMIN_EXP IS092 1.62
+                    Adj: General & Administrative IS_GNRL_AND_ADMIN_EXP IS092 1.63
+                Other operating expenses IS_OPERATING_EXPN IS032 99.94
+            Other Operating Expenses ARD_OTHER_OPERATING_EXPENSES A0013 473.63
+    Operating expenses -473,630.00
+    Other Non-Operating Expenses ARDR_OTHER_NON_OPERATING_EXP R0028 0.37
+    Bank charges 374.00
+        Adj: Other Operating Expenses IS_OPERATING_EXPN IS032 -373.31
+        Depreciation & Amortization IS_DEPR_EXP IS070 75.97
+        Depreciation/Amortization Of Prperty Asset ARDR_DEPREC_AMORT_OF_PRPTY_ASS... 75.97
+            Amortisation of land use rights 24,642.00
+            Depreciation of property, plant and equipment 51,333.00
+        Interest Expense IS_INT_EXPENSE IS034 158.00
+        Interest Expense ARDR_INT_EXP R0014 158.00
+        Interest expense for bank borrowings 125,011.00
+        Interest expense for other borrowings 32,986.00
+        (G)L sale of RE assets IS_GL_ON_SALE_OF_PRPTY_MTG IS045 0.00
+            Net non-op L (G) IS_NET_NON_OPER_LOSS IS037 -444.22
+        Other Non-Operating Income ARD_OTHER_NON_OPERATING_INC A0027 -26.71
+        Finance income 26,713.00
+        Other Financial Losses ARD_OTHER_FINANCIAL_LOSSES A3490 16.71
+        Other Financial Expenses 6,407.00
+        Amortisation of transaction costs for borrowings 10,304.00
+        Fair value gain on top-up payment asset 0.00
+        Foreign exchange loss on financing activities 0.00
+        Revaluation Of Investment Properties ARD_REVALU_OF_INVEST_PROPERTIES A4302 -434.59
+        Fair value gains on investment properties 434,589.00
+        Income Tax Expense IS_INC_TAX_EXP IS038 58.33
+        Current Income Tax Expense (Benefit) ARD_CUR_INCOME_TAX_EXP_BENEFIT A1057 5.93
+        - China corporate income tax 5,682.00
+            - Under-provision in prior years 245.00
+        Deferred Income Tax Expense (Benefit) ARD_DEFERRED_INC_TAX_EXP_BEN A1058 52.40
+            Deferred income tax (Note 21) 52,400.00
+        Minority Interests MIN_NONCONTROL_INTEREST_CREDITS IS043 0.00
+    Tot cash pref. dvd IS_TOT_CASH_PFD_DVD IS051 0.00
+    Other Adjustments OTHER_ADJUSTMENTS IS168 0.00
+        XO L(G), net of tax XO_LOSS_GAIN_NET_OF_TAX RR240 -362.88
+            Abnormal Losses (Gains) IS_ABNORMAL_ITEM IS095 -434.59
+            Tax effect on abnormals IS_TAX_EFF_ON_ABNORMAL_ITEM IS096 71.71
+            Statutory Tax Rate IS_STATUTORY_TAX_RATE IM156 0.17
+"
+EARN_FOR_COMMON ""
+
+BS_TOT_ASSET
+"
+    Total Assets BS_TOT_ASSET BS035 25,221.35
+        Total Assets ARD_TOT_ASSETS A0753 25,221.35
+            Total assets 25,221,348.00
+    Total R.E. Invest BS_RE_INVEST BS027 19,753.50
+    Net real estate BS_NET_FIX_ASSET BS032 19,753.50
+    RE inv hld resale BS_MKT_SEC_OTHER_ST_INVEST BS011 0.00
+        RE eqty interest BS_INVEST_IN_ASSOC_CO BS089 0.00
+    RE properties BS_GROSS_FIX_ASSET BS030 19,753.50
+        Real Estate Investments ARD_RE_INVEST A0932 19,753.50
+            Investment properties 19,753,500.00
+    Tot mtgs/notes NET_MORTGAGES_NOTES BS009 0.00
+        Mortgage Loans BS_TOT_LOAN BS020 0.00
+            Mtg backed invsts BS_TOT_MTG_BACK_INVEST_CMO BS019 0.00
+                Notes receivable NOTES_RECEIVABLE BS008 0.00
+            Less Allowance BS_LESS_ALLOW BS054 0.00
+            Cash & Equivalents BS_CASH_NEAR_CASH_ITEM BS010 655.54
+        Cash and Equivalents ARD_CASH_AND_EQUIVALENTS A0045 655.54
+        Cash and cash equivalents 655,543.00
+    Other investments BS_LT_INVEST BS029 7.17
+        Short-Term Investments ARD_ST_INVEST A1020 7.17
+        Short-term bank deposits 7,169.00
+        Receivables BS_ACCT_NOTE_RCV BS012 10.29
+            Accounts Receivable - Trade ARD_ACCTS_RECEIVABLE_TRADE A0047 10.29
+        Trade receivables 10,291.00
+    Other Assets BS_OTHER_ASSETS_DEF_CHRG_OTHER BS033 4,794.84
+    Prepaid Expenses and Other ARD_PREPAID_EXP_AND_OTHER A0050 35.13
+        Prepayments, deposits and other receivables 35,132.00
+            Amounts Due From Related Companies ARD_AMTS_DUE_FROM_RELATED_CO A3637 335.55
+        Amount due from related parties 335,554.00
+    Prepaid Taxes ARD_PREPAID_TAXES A3779 1.11
+        Tax recoverable 1,108.00
+        Other Current Assets ARD_OTHER_CURRENT_ASSETS A0056 87.42
+        Top-up payment asset, current portion 82,593.00
+            Inventories 4,827.00
+        Goodwill ARD_GOODWLL A0075 160.32
+        Goodwill 160,324.00
+    Deferred Income Tax Asset (Long-Term) ARD_DEFERRED_INC_TAX_ASSET_LT A0070 161.85
+    Deferred assets 161,846.00
+        Other Noncurrent Assets ARD_OTHER_NONCURRENT_ASSET A0079 76.64
+    Top-up payment asset, non-current portion 76,644.00
+        Property Plant & Equipment - Net ARD_PROPERTY_PLANT_EQUIP_NET A0069 3,936.82
+            Property, plant and equipment 2,384,350.00
+            Land use rights 1,552,467.00
+"
+BS_TOT_LIAB2
+"
+    Total Liabilities BS_TOT_LIAB2 RR005 11,685.62
+        Total Liabilities BS_TOT_LIAB_REITS BS053 11,685.62
+        A/P & accruals BS_ACCT_PAYABLE BS036 12.87
+        Accounts Payable - Trade ARD_ACCOUNTS_PAYABLE_TRADE A0080 12.87
+            Trade payables 12,871.00
+    Total deposits BS_CUSTOMER_DEPOSITS BS041 86.56
+        Security Deposits (Liability) ARD_SECURITY_DEPOSIT_LIABILITY A0859 86.56
+        Rental deposits, current portion 86,563.00
+            Unsecured Debt BS_ST_BORROW BS047 5,134.20
+    Unsecured Debt ARDR_UNSECURED_DEBT R0860 5,134.20
+        Unsecured 5,134,199.00
+    Other ST liab BS_OTHER_ST_LIAB BS048 905.88
+    Customer Deposits/Advances (Short-Term) ARD_CUSTOMER_DEPOSIT_ADVANCES_ST A1029 61.12
+        Receipts in advance 61,125.00
+    Accrued Expenses and Other ARD_ACCRUED_EXP_AND_OTHER A0090 778.88
+        Accruals and other payables 778,882.00
+    Amounts Due To Related Companies ARD_AMTS_DUE_TO_RELATED_CO A3680 65.88
+        Amounts due to related parties 65,877.00
+    Secured Debt BS_LT_BORROW BS051 2,675.00
+    Secured Debt ARDR_SECURED_DEBT R0863 2,675.00
+    Secured 2,675,000.00
+    Short-Term Borrowings ARD_ST_BORROW A0087 0.00
+        Borrowings 0.00
+    Other LT Liabilities BS_OTHER_LT_LIABILITIES BS052 2,871.10
+    Deferred Income Taxes (Liabilities) ARD_DEFERRED_INCOME_TAXES_LIAB A0101 2,678.46
+        Deferred tax liabilities 2,678,462.00
+    Other Noncurrent Liabilities ARD_OTH_NONCURRENT_LIABILITIES A0106 192.64
+        Receipts in advance 24,404.00
+    Rental deposits, non-current portion 168,238.00
+"
+BS_TOT_LIAB_EQY
+"
+    Tot liab & equity BS_TOT_LIAB_EQY BS096 25,221.35
+    Total Liabilities BS_TOT_LIAB_REITS BS053 11,685.62
+    A/P & accruals BS_ACCT_PAYABLE BS036 12.87
+    Accounts Payable - Trade ARD_ACCOUNTS_PAYABLE_TRADE A0080 12.87
+        Trade payables 12,871.00
+    Total deposits BS_CUSTOMER_DEPOSITS BS041 86.56
+    Security Deposits (Liability) ARD_SECURITY_DEPOSIT_LIABILITY A0859 86.56
+        Rental deposits, current portion 86,563.00
+    Unsecured Debt BS_ST_BORROW BS047 5,134.20
+    Unsecured Debt ARDR_UNSECURED_DEBT R0860 5,134.20
+        Unsecured 5,134,199.00
+    Other ST liab BS_OTHER_ST_LIAB BS048 905.88
+    Customer Deposits/Advances (Short-Term) ARD_CUSTOMER_DEPOSIT_ADVANCES_ST A1029 61.12
+        Receipts in advance 61,125.00
+    Accrued Expenses and Other ARD_ACCRUED_EXP_AND_OTHER A0090 778.88
+        Accruals and other payables 778,882.00
+    Amounts Due To Related Companies ARD_AMTS_DUE_TO_RELATED_CO A3680 65.88
+        Amounts due to related parties 65,877.00
+    Secured Debt BS_LT_BORROW BS051 2,675.00
+        Secured Debt ARDR_SECURED_DEBT R0863 2,675.00
+            Secured 2,675,000.00
+        Short-Term Borrowings ARD_ST_BORROW A0087 0.00
+            Borrowings 0.00
+        Other LT Liabilities BS_OTHER_LT_LIABILITIES BS052 2,871.10
+        Deferred Income Taxes (Liabilities) ARD_DEFERRED_INCOME_TAXES_LIAB A0101 2,678.46
+            Deferred tax liabilities 2,678,462.00
+        Other Noncurrent Liabilities ARD_OTH_NONCURRENT_LIABILITIES A0106 192.64
+            Receipts in advance 24,404.00
+    Rental deposits, non-current portion 168,238.00
+    Shareholders Equity BS_TOT_EQY BS095 13,535.73
+    Preferred Equity BS_PFD_EQY BS061 0.00
+    Min/part interest MINORITY_NONCONTROLLING_INTEREST BS062 88.60
+    Minority/Non Controlling Int (Stckhldrs Eqty) ARD_MIN_NONCONTROL_INT_SE A0108 88.60
+        At 30 June 2015 88,600.00
+    Cap & revenue res BS_RETAIN_EARN BS065 13,447.13
+    Total Shareholders Equity ARD_TOTAL_SHAREHOLDERS_EQUITY A0512 13,535.73
+        At 30 June 2015 13,535,727.00
+"
+TOT_LIAB_AND_EQY ""
+
+CF_NET_CHNG_CASH
+"
+    Net Changes in Cash CF_NET_CHNG_CASH CF036 -330.76
+    Net Change In Cash ARD_NET_CHANGE_IN_CASH A0757 -330.76
+        Net decrease in cash and cash equivalents -330,757.00
+    Cashflow-Operating Activities CF_CASH_FROM_OPER CF015 276.36
+    Net income (loss) CF_NET_INC CF010 545.03
+    Net Income ARD_NET_INC A0037 545.03
+        Profit after income tax before transactions with unithol... 545,028.00
+    Other non cash CF_OTHER_NON_CASH_ADJUST CF012 -268.67
+    Profit Before Taxation And Minority Interest ARD_PROF_BEFORE_TAX_MINORITY_INT A3601 380.92
+        Cash generated from operations 380,918.00
+    Finance Cost Paid ARD_FINANCE_COST_PAID A3571 -158.00
+        Interest paid -157,997.00
+    Tax Paid ARD_TAX_PAID A3616 -5.88
+        Corporate income tax paid -5,875.00
+    Interest Received ARD_INTEREST_RECEIVED A1206 21.09
+        Interest received 21,093.00
+    Other Non-Cash Items ARD_OTHER_NON_CASH_ITEMS A0134 38.22
+        Top-up payment received 38,221.00
+    Cashflow-Investing Activities CF_CASH_FROM_INV_ACT CF025 -13.95
+    Sales of property CF_DISP_FIX_ASSET CF016 0.00
+    Property Additions CF_CAP_EXPEND_PRPTY_ADD CF017 -19.91
+    Property Additions ARD_PROPERTY_ADDITIONS A0868 -19.91
+        Additions of investment properties -19,911.00
+    Property improvements CF_PRPTY_IMPRV CF021 0.00
+    Dec(inc) invsts CF_DECR_INVEST CF018 5.98
+    Proceeds From Investments ARD_PROCEEDS_FROM_INVESTMENTS A0154 5.98
+        Increase/(decrease) in short-term bank deposits with... 5,984.00
+    Increase in Notes CF_INCR_INVEST CF019 0.00
+    Dec(inc) mtg invsts CF_CHANGE_IN_LOANS CF020 0.00
+    Dec(Inc) RE int DEC_INC_RE_INT CF069 0.00
+    Dec(Inc) Re int/other CF_OTHER_INV_ACT CF024 -0.02
+    Capital Expenditures ARD_CAPITAL_EXPENDITURES A0147 -0.02
+        Additions of property, plant and equipment -20.00
+    Cashflow-Financing Activities CF_CASH_FROM_FNC_ACT CF035 -593.17
+    Dividends Paid CF_DVD_PAID CF026 -338.77
+    Dividends Paid ARD_DIVIDEND_PD A0158 -338.77
+        Distribution paid -338,775.00
+    Increase: LT Debt CF_INCR_LT_BORROW CF028 0.00
+    Inc(dec) mtg debt CF_REIMB_LT_BORROW CF029 -307.58
+    Increase In Borrowings ARD_INCREASE_IN_BORROWINGS A3576 307.42
+        Proceeds from borrowings, net of transaction costs 307,422.00
+    Decrease In Borrowings ARD_DECREASE_IN_BORROWINGS A3560 -615.00
+        Repayment of borrowings -615,000.00
+    Increase capital stock CF_INCR_CAP_STOCK CF030 53.18
+    Issuance of Common Stock ARD_ISSUANCE_OF_COMMON_STOCK A0165 53.18
+        Issuance of units 53,183.00
+    Dec capital stock CF_DECR_CAP_STOCK CF031 0.00
+    Other Financing Activities CF_OTHER_FNC_ACT CF034 0.00
+"}

@@ -135,17 +135,20 @@
 (defn has-num? [word]
   (re-find #"\d" word))
 
-(defn snippetlet [page-num element-num subelement-num word]
+(defn snippetlet2 [page-num element-num subelement-num word]
   (let [
         {:strs [value negative?]} (get-in @report-values [@field (str page-num) (str element-num) (str subelement-num)])
         ]
     [:span
-     (if (has-num? word)
        {:style {:background-color (if value "white")
                 :color (cond negative? "red" value "green")}
         :on-click #(click-div page-num element-num subelement-num word)}
-       {}
-       ) word]))
+     word]))
+
+(defn snippetlet [page-num element-num subelement-num word]
+  (if (has-num? word)
+    [snippetlet2 page-num element-num subelement-num word]
+    [:span word]))
 
 (defn snippet [page-num element-num sentence]
   (let [
