@@ -22,19 +22,19 @@
 ;; </g>
 
 (def colors {"calc" "#ffffff"
-             "country" "#1e90ff"
              "sector" "#1e90ff"
              "manual" "#fffacd"
              "combo" "#ff66ff"
              "report" "#ffb6c1"})
 
-#_(defn clean-vector [item]
+(defn clean-vector [item]
   (if (subitem? [:g {:class "node"}] item)
     (let [
           [_g m-g [_ m-ellipse] [_ m-text1 text1] [_ m-text2 text2]] item
-          value (get @summaries text1)
+          field (core/replace-all text1 " " "-")
+          value (get @values field)
           value (cond
-                 (not (number? value)) 0
+                 (not (number? value)) value
                  (zero? value) 0
                  (<= (js/Math.log10 (js/Math.abs value)) 2)
                  (if (integer? value)
@@ -42,65 +42,38 @@
                    (.toFixed value 3))
                  :default
                  (.toExponential value 2))
-          discrepancy (get-in @summaries ["discrepancies" text1])
-          default-option (get @default-sources text1 "calc")
-          chosen-option (get @calc-sources text1 default-option)
-          default-bloomberg (first (get @bloomberg-options text1))
-          value (if (and discrepancy (#{"report" "manual" "combo" "calc"} chosen-option))
-                  (str value " " (int (* 100 discrepancy)))
-                  value)
-          on-click (if (and (not= "sector" default-option) (not= "country" default-option))
-                     #(open-dialog text1))
-          fill (colors chosen-option "#90ee90")
-          fill (cond
-                (and (@leaves text1) (= "calc" chosen-option)) "#87ceeb"
-                (@warnings text1) "#ff6600"
-                (@errors text1) "#ff0000"
-                :default fill)
+          on-click #(open-dialog field)
+          fill (colors
+                (cond
+                 (get @manual-values field) "manual"
+                 (@final-output field) "combo"
+                 (@automatic-input field) "sector"
+                 (@manual-input field) "report"
+                 :default "calc"))
           ]
-      [:g (assoc m-g :on-click on-click) [:title (@equations text1)]
+      [:g (assoc m-g :on-click on-click) ;[:title (@equations text1)]
        [:ellipse (assoc m-ellipse :fill fill)] [:text m-text1 text1] [:text m-text2 value]])
     item))
 
-#_(def dialog-text (atom ""))
-#_(def selected-option (atom ""))
-#_(def manual-value (atom ""))
-
-#_(defn close-dialog []
+(defn close-dialog []
   (let [
-        f #(and % (not-empty (.trim %)))
-        manual-value2 (core/key-filter f @manual-value)
         ]
-    (swap! calc-sources assoc-in [@dialog-text] @selected-option)
-    (swap! calc-manual-values assoc-in [@dialog-text] manual-value2)
-    (POST "/update-graph" {:params {:company @company
-                                    :calc-sources @calc-sources
-                                    :calc-manual-values @calc-manual-values
-                                    }
-                           :handler #(reset! summaries %)})
+    (POST "/update-manual-values" {:params {:manual-values (core/value-map js/Number @manual-values) :company @company}
+                                   :handler #(reset! values %)
+                                   })
     (-> "node_dialog" js/document.getElementById .close)))
 
+(def field (atom nil))
 
-#_(defn open-dialog [field]
+(defn open-dialog [phield]
   (let [
-        default-option (get @default-sources field "calc")
-        selected-op (get-in @calc-sources [field] default-option)
-        man-value (get-in @calc-manual-values [field] {"" 0})
         ]
-    (reset! dialog-text field)
-    (reset! selected-option selected-op)
-    (reset! manual-value man-value)
+    (reset! field phield)
     (-> "node_dialog" js/document.getElementById .showModal)))
 
-#_(defn dialog []
+(defn dialog []
   (let [
-        field @dialog-text
-        company @company
-        options (concat ["report" "manual" "combo"] (get @bloomberg-options field))
-        options (if (@roots field) options (conj options "calc"))
-        selected-option2 @selected-option
-        man-keys (concat (keys @manual-value) (repeat ""))
-        man-vals (concat (vals @manual-value) (repeat ""))
+        value (get @manual-values @field)
         ]
     [:dialog {:id "node_dialog"
               :style {:left 0
@@ -109,60 +82,18 @@
                       :width 200
                       }}
      [:div
-      ;;source selector
-      [:p "Select Source"]
-      [:table
-       [:tbody
-        (for [option options]
-          ^{:key option}
-          [:tr
-           [:td
-            [:input {:type "radio" :name "source-selector"
-                     :checked (= option selected-option2)
-                     :on-change #(reset! selected-option option)
-                     }] option
-            ]])]]
-      (if (= "manual" selected-option2)
-        [:table
-         [:tbody
-          (map
-           (fn [k v i]
-             ^{:key (str "manual" i)}
-             [:tr
-              [:td
-               [:input {:type "text"
-                        :style {:width 80}
-                        :default-value k
-                        :on-blur #(swap! manual-value
-                                         (fn [old]
-                                           (let [
-                                                 old (dissoc old k)
-                                                 new-key (-> % .-target .-value .trim)
-                                                 ]
-                                             (if (not= "" new-key)
-                                               (assoc old new-key v)
-                                               old))))
-                        }]]
-              [:td
-               [:input {:type "text"
-                        :style {:width 80}
-                        :default-value v
-                        :on-blur #(swap! manual-value assoc k (-> % .-target .-value js/Number))
-                        }]]]) man-keys man-vals (range 4))]])
-      (if (= "combo" selected-option2)
-        [:input {:type "text"
-                 :style {:width 80}
-                 :default-value (get @manual-value "combo" "")
-                 :on-blur #(swap! manual-value assoc "combo" (-> % .-target .-value))}])
-      [:br]
+      [:input {:type "radio" :name "rad" :checked (not value) :on-change #(swap! manual-values dissoc @field)}] "Default" [:br]
+      [:input {:type "radio" :name "rad" :checked (boolean value) :on-change #(swap! manual-values assoc @field "")}] "Override" [:br]
+      [:input {:type "number" :value (or value "") :on-change #(swap! manual-values assoc @field (-> % .-target .-value))}] [:br]
       [:input {:type "button" :on-click close-dialog :value "Close"}]]]))
 
 (defn content []
   (let [
-        ;svg (walk/postwalk clean-vector @graph)
-        svg (assoc-in @graph [1 :viewBox] "450 0.00 3000 1100")
+        svg (walk/postwalk clean-vector @graph)
+        svg (assoc-in svg [1 :viewBox] "450 0.00 3000 1100")
         ]
     [:div
+     [dialog]
      svg
      ]))
 

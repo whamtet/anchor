@@ -1,5 +1,25 @@
 (ns anchor.util)
 (require 'clojure.walk)
+(require '[clojure.java.io :as io])
+(import java.util.Calendar)
+
+(defn map-by [f s]
+  (zipmap (map f s) s))
+
+(def months ["Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec"])
+
+(defn datestamp []
+  (let [
+        cal (Calendar/getInstance)
+        ]
+    (str (.get cal Calendar/DATE) " " (months (.get cal Calendar/MONTH)) " " (.get cal Calendar/YEAR))
+    ))
+
+(defn binary-slurp [f]
+  (with-open [in (io/input-stream f)
+              out (java.io.ByteArrayOutputStream.)]
+    (io/copy in out)
+    (.toByteArray out)))
 
 (defn dissoc-in-all [m v]
   (condp = (count v)

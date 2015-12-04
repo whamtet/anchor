@@ -54,6 +54,7 @@
            [:input {:type "number"
                     :default-value allocation
                     :on-blur #(do
+                                (println (-> % .-target .-value))
                                 (swap! company-sectors assoc-in [company sector] (-> % .-target .-value js/Number))
                                 (POST "/update-company-sectors" {:params {:company-sectors @company-sectors}}))}]]
           [:td

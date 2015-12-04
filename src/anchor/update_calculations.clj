@@ -12,7 +12,7 @@
     value ["," "(" ")"])))
 
 (defn parse-values [values]
-  (reduce + (map parse-values (remove empty? (.split values " ")))))
+  (reduce + (map parse-value (remove empty? (.split values " ")))))
 
 (defn manual-overrides [company reporting-period factor]
   (let [
@@ -39,7 +39,7 @@
                        (if negative? (- value) value)))]))))
 
 (defn date-value [s]
-  (let [[year month] (.split s " ")]
+  (let [[year month] (map #(Integer/parseInt %) (.split s " "))]
     (- 0 year (/ month 12))))
 
 (defn manual-values [company]
@@ -69,6 +69,8 @@
      100
      )))
 
+(def default-inputs {"new-project-return" 0 "new-project-expenditure" 0})
+
 (defn inputs [companies]
   (let [
         manual-values (map manual-values companies)
@@ -76,8 +78,11 @@
         yahoo-data (yahoo/data2 companies)
         ]
     (zipmap companies
-            (map (fn [manual cap-rate yahoo-data]
-                   (assoc (merge manual yahoo-data) "cap-rate" cap-rate))
-                 manual-values cap-rates yahoo-data))))
+            (map (fn [company manual cap-rate yahoo-data]
+                   (merge default-inputs manual yahoo-data {"cap-rate" cap-rate} (get @model/manual-values company)))
+                 companies manual-values cap-rates yahoo-data))))
 
-(println (inputs ["INTC"]))
+(defn nums
+  ([] (nums (keys @model/report-metadata)))
+  ([companies]
+   (util/value-map model/add-output (inputs companies))))

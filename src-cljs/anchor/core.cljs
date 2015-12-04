@@ -14,6 +14,9 @@
                 anchor[klass][k] = reagent.core.atom(cljs.reader.read_string(value))
                 "))
 
+(defn value-map [f m]
+  (zipmap (keys m) (map f (vals m))))
+
 (defn page [contents]
   (reagent/render-component
    [contents]
@@ -67,3 +70,15 @@
   (if new-window?
     (.open js/window (url url2 m) "_blank")
     (set! (.-location js/document) (url url2 m))))
+
+(defn min-by [f [item & rest]]
+  (first
+   (reduce (fn [[x1 y1] x2]
+             (let [y2 (f x2)]
+               (if (< y1 y2)
+                 [x1 y1]
+                 [x2 y2])))
+           [item (f item)] rest)))
+
+(defn max-by [f s]
+  (min-by #(- (f %)) s))

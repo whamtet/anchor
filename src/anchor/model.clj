@@ -1,11 +1,13 @@
 (ns anchor.model)
 (require '[anchor.db :as db])
+(require '[clojure.walk :as walk])
 
 ;;Here we define our financial model
 ;;anchor will parse the model to generate the appropriate user interfaces
 
 (def model
-  '[income-asset-value (/ net-income cap-rate)
+  '[
+    income-asset-value (/ net-income cap-rate)
     gross-asset-value (+ income-asset-value cash other-assets)
     net-asset-value (- gross-asset-value total-liabilities)
     new-project-value (* new-project-expenditure (- (/ new-project-return cap-rate) 1))
@@ -14,6 +16,7 @@
     market-cap (* shares-outstanding share-price)
     nav-discount (- (/ market-cap net-asset-value) 1)
     fair-value-discount (- (/ market-cap fair-value) 1)
+    leverage (/ total-liabilities net-asset-value)
     ])
 
 ;;which variables are calculated automatically
@@ -27,7 +30,7 @@
 (defn get-nodes
   "get the nodes for a form"
   [form]
-   (set (filter node? (flatten form))))
+  (set (filter node? (flatten form))))
 
 ;;all values in the model
 (def nodes (get-nodes model))
@@ -44,23 +47,24 @@
 (def input (clojure.set/difference nodes output))
 (def manual-input (clojure.set/difference input automatic-input))
 
-;;function to calculate model output
-(eval
- `(defn add-output
-    "adds model output to input"
-    [input#]
+(def final-output (apply clojure.set/difference output (vals dependencies)))
 
-    ;;assert every input argument
-    (doseq [arg# ~(mapv str input)]
-      (assert (input# arg#) arg#))
-
-    ;;do the calculations
-    (let [
-          {:strs ~(vec input)} input#
-          ~@model
-          output# (zipmap ~(mapv str output) ~(vec output))
-          ]
-      (merge input# output#))))
+(defn add-output [input-map]
+  (doseq [arg input]
+    (assert (input-map (str arg)) arg))
+  (let [
+        defined-vars (set (map symbol (keys input-map)))
+        model (mapcat (fn [[a b]]
+                        (if-not (defined-vars a) [a b]))
+                      (partition 2 model))
+        ]
+    (eval
+     `(let [
+            {:strs ~(vec defined-vars)} ~input-map
+            ~@model
+            output# (zipmap ~(mapv str output) ~(vec output))
+            ]
+        (merge ~input-map output#)))))
 
 ;;state
 (db/dbatom report-values "report-values") ;company -> reporting period -> variable -> values
@@ -73,3 +77,17 @@
 (db/dbatom company-sectors "company-sectors") ;company -> sector mix
 (db/dbatom node-order "node-order")
 (db/dbatom node-types "node-types")
+(db/dbatom report-hints "report-hints")
+
+(defn nums-string
+  "only nums in string"
+  [s]
+  (apply str (re-seq #"[0-9\.-]+" s)))
+
+(defn clean-up [m]
+  (if-let [value (get m "value")]
+    (assoc m "value" (nums-string value))
+    m))
+
+(defn clean-up-map [m]
+  (walk/postwalk clean-up m))

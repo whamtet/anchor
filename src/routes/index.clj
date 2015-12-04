@@ -66,6 +66,20 @@
      ]
     )))
 
+(defn blank-page
+  "page with aforementioned snippet"
+  [classes kvs]
+  (response/response
+   (hiccup/html5
+    [:head
+      [:meta {:http-equiv "X-UA-Compatible" :content "IE=edge"}]
+      [:meta {:charset "UTF-8"}]
+     ]
+    [:body
+     (injectoid classes kvs)
+     ]
+    )))
+
 (defroutes routes
   (GET "/" []
        (hiccup/html5

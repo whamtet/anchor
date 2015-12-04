@@ -15,6 +15,8 @@
             [ring.middleware.edn :as wrap-edn]
             [routes.settings :as settings]
             [routes.bberg :as bberg]
+            [routes.viewer :as viewer]
+            [routes.allocation :as allocation]
             ))
 
 (defroutes app
@@ -34,6 +36,8 @@
           #'settings/routes
           #'program-graph/routes
           #'bberg/routes
+          #'viewer/routes
+          #'allocation/routes
           app
            ))
 

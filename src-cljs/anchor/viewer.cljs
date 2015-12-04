@@ -16,16 +16,19 @@
 (defn set-field [input]
   (reset! field input))
 
-(defn update-report-values []
+(defn update-report-values [text]
   (POST "/update-report-values" {:params {:company @company
                                           :reporting-period @reporting-period
                                           :report-values @report-values
-                                          :report-manuals @report-manuals}}))
+                                          :report-manuals @report-manuals
+                                          :text text
+                                          :field @field
+                                          }}))
 
 (defn clear-field [to-clear]
   (swap! report-values dissoc to-clear)
   (swap! report-manuals dissoc to-clear)
-  (update-report-values))
+  (update-report-values nil))
 
 (defn field-row [input]
   (let [
@@ -118,9 +121,22 @@
           ^{:key input}
           [field-row input])]]])])
 
-(defn click-div [page element-num subelement-num word]
+(defn nums-string
+  "only nums in string"
+  [s]
+  (apply str (re-seq #"[0-9\.-]+" s)))
+
+(defn click-div [page element-num subelement-num word event]
   (let [
+        word (nums-string word)
         {negative? "negative?" :as x} (get-in @report-values [@field (str page) (str element-num) (str subelement-num)])
+
+        parent-div (-> event .-target .-parentElement .-parentElement)
+        text-layer (.-parentElement parent-div)
+        parent-height (-> parent-div .-style .-top)
+
+        matching-elements (filter #(-> % .-style .-top (= parent-height)) (array-seq (.-children text-layer)))
+        leftmost-element (core/min-by #(-> % .-style .-left (.replace "px" "") js/Number) matching-elements)
         ]
     (cond
      negative?
@@ -129,7 +145,7 @@
      (swap! report-values assoc-in [@field (str page) (str element-num) (str subelement-num) "negative?"] true)
      :default
      (swap! report-values assoc-in [@field (str page) (str element-num) (str subelement-num)] {"value" word "negative?" false}))
-    (update-report-values)
+    (update-report-values (if-not negative? (.-textContent leftmost-element)))
     ))
 
 (defn has-num? [word]
@@ -142,7 +158,7 @@
     [:span
        {:style {:background-color (if value "white")
                 :color (cond negative? "red" value "green")}
-        :on-click #(click-div page-num element-num subelement-num word)}
+        :on-click #(click-div page-num element-num subelement-num word %)}
      word]))
 
 (defn snippetlet [page-num element-num subelement-num word]
