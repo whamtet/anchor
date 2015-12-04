@@ -9,7 +9,6 @@
 (require '[ring.util.response :as response])
 (import java.io.File)
 
-
 (defroutes routes
   (GET "/new-report" [company]
        (index/page ["new_report"] {
@@ -58,7 +57,7 @@
         (model/set-report-manuals)
         (model/set-report-values)
         util/ok-response)
-  (POST "/update-report-metadata2" [company reporting-period report-metadata text field]
+  (POST "/update-report-metadata2" [company reporting-period report-metadata]
         (swap! model/report-metadata assoc-in [company reporting-period] (util/clean report-metadata))
         (model/set-report-metadata)
         util/ok-response)

@@ -8,6 +8,10 @@
 
 (def field (atom nil))
 (def show-metadata? (atom false))
+(def page-height (atom 700))
+
+(defn set-height! []
+  (reset! page-height (+ 32 (* (/ 383 366) (.height (js/$ "#viewerContainer"))))))
 
 (defn elements-on-page [page-index]
   (array-seq
@@ -16,19 +20,16 @@
 (defn set-field [input]
   (reset! field input))
 
-(defn update-report-values [text]
+(defn update-report-values []
   (POST "/update-report-values" {:params {:company @company
                                           :reporting-period @reporting-period
                                           :report-values @report-values
-                                          :report-manuals @report-manuals
-                                          :text text
-                                          :field @field
-                                          }}))
+                                          :report-manuals @report-manuals}}))
 
 (defn clear-field [to-clear]
   (swap! report-values dissoc to-clear)
   (swap! report-manuals dissoc to-clear)
-  (update-report-values nil))
+  (update-report-values))
 
 (defn field-row [input]
   (let [
@@ -95,9 +96,25 @@
             :value "Done"
             :on-click #(reset! show-metadata? false)}]])
 
+(defn position-div [page-frac negative?]
+  [:div {:style {:width 15
+                 :height 3
+                 :background-color (if negative? "red" "green")
+                 :position "fixed"
+                 :right 0
+                 :top (* @page-height (/ page-frac js/PDFViewerApplication.pagesCount))}}])
+
+(defn position-divs []
+  [:div
+   (for [[page indices] (get @report-values @field)
+         [index subindices] indices
+         [subindex {:strs [page-frac negative?]}] subindices
+         :when page-frac
+         ]
+     ^{:key (str page index subindex)}
+     [position-div page-frac negative?])])
 
 (defn content []
-  [metadata-form]
   [:div
    {:style {:background-color "white"
             :width "18%"
@@ -105,6 +122,7 @@
             :position "relative"
             :padding 7
             }}
+   [position-divs]
    (if @show-metadata?
      [metadata-form]
      [:div
@@ -129,7 +147,7 @@
 (defn click-div [page element-num subelement-num word event]
   (let [
         word (nums-string word)
-        {negative? "negative?" :as x} (get-in @report-values [@field (str page) (str element-num) (str subelement-num)])
+        {negative? "negative?" :as m} (get-in @report-values [@field (str page) (str element-num) (str subelement-num)])
 
         parent-div (-> event .-target .-parentElement .-parentElement)
         text-layer (.-parentElement parent-div)
@@ -137,15 +155,24 @@
 
         matching-elements (filter #(-> % .-style .-top (= parent-height)) (array-seq (.-children text-layer)))
         leftmost-element (core/min-by #(-> % .-style .-left (.replace "px" "") js/Number) matching-elements)
+        left-text (.-textContent leftmost-element)
+
+        x (-> parent-div .-style .-top (.replace "px" "") js/Number)
+        y (.height (js/$ text-layer))
+        page-frac (+ page (/ x y))
         ]
     (cond
      negative?
      (swap! report-values core/dissoc-in-all [@field (str page) (str element-num) (str subelement-num)])
-     x
+     m
      (swap! report-values assoc-in [@field (str page) (str element-num) (str subelement-num) "negative?"] true)
      :default
-     (swap! report-values assoc-in [@field (str page) (str element-num) (str subelement-num)] {"value" word "negative?" false}))
-    (update-report-values (if-not negative? (.-textContent leftmost-element)))
+     (swap! report-values assoc-in [@field (str page) (str element-num) (str subelement-num)] {
+                                                                                               "value" word "negative?" false
+                                                                                               "left-text" left-text
+                                                                                               "page-frac" page-frac
+                                                                                               }))
+    (update-report-values)
     ))
 
 (defn has-num? [word]
@@ -156,9 +183,9 @@
         {:strs [value negative?]} (get-in @report-values [@field (str page-num) (str element-num) (str subelement-num)])
         ]
     [:span
-       {:style {:background-color (if value "white")
-                :color (cond negative? "red" value "green")}
-        :on-click #(click-div page-num element-num subelement-num word %)}
+     {:style {:background-color (if value "white")
+              :color (cond negative? "red" value "green")}
+      :on-click #(click-div page-num element-num subelement-num word %)}
      word]))
 
 (defn snippetlet [page-num element-num subelement-num word]
@@ -185,8 +212,17 @@
                      element)))
                 (elements-on-page page-index))))
 
+(def render-virgin? (cljs.core/atom true))
+(defn text-layer-rendered [event]
+  (when @render-virgin?
+    (reset! render-virgin? false)
+    (set-height!)
+    (core/page content))
+  (-> event .-detail .-pageNumber add-click-listeners))
+
 (defn main []
   (reset! field (first @inputs))
-  (js/document.addEventListener "textlayerrendered" #(-> % .-detail .-pageNumber add-click-listeners))
+  (js/document.addEventListener "textlayerrendered" text-layer-rendered)
   (js/$ #(js/loadFile (core/format "/reports/%s/%s.pdf" @company @reporting-period)))
-  (core/page content))
+  )
+
