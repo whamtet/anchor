@@ -3,6 +3,21 @@
 (require '[clojure.java.io :as io])
 (import java.util.Calendar)
 
+(defn recompose-map
+  ([vs] (recompose-map {} vs))
+  ([m vs]
+   (reduce (fn [m v]
+             (assoc-in m (pop v) (peek v)))
+           m vs)))
+
+(defn decompose-map
+  ([m] (decompose-map [] m))
+  ([stack m]
+   (if (map? m)
+     (mapcat (fn [[k v]]
+               (decompose-map (conj stack k) v)) m)
+     [(conj stack m)])))
+
 (defn map-by [f s]
   (zipmap (map f s) s))
 

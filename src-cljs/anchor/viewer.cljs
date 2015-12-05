@@ -4,11 +4,16 @@
    [reagent.core :as reagent :refer [atom]]
    [anchor.core :as core]
    [crate.core :as crate]
+   [clojure.data :as data]
    ))
 
 (def field (atom nil))
-(def show-metadata? (atom false))
+(def menu-status (atom :default))
 (def page-height (atom 700))
+
+(def import-column (atom 2))
+(def starting-page (atom 66))
+(def ending-page (atom 70))
 
 (defn set-height! []
   (reset! page-height (+ 32 (* (/ 383 366) (.height (js/$ "#viewerContainer"))))))
@@ -17,8 +22,80 @@
   (array-seq
    (js/$ (core/format "#pageContainer%s > .textLayer > div" page-index))))
 
-(defn set-field [input]
-  (reset! field input))
+(defn top [element]
+  (-> element .-style .-top (.replace "px" "") js/Number))
+(defn left [element]
+  (-> element .-style .-left (.replace "px" "") js/Number))
+(defn text-content [element]
+  (.-textContent element))
+
+(defn delay-f
+  "visits page, waits for load then executes"
+  [page f]
+  (set! js/PDFViewerApplication.page page)
+  (let [
+        element (js/document.getElementById (str "pageContainer" page))
+        ]
+    ((fn g []
+       (if (.hasAttribute element "data-loaded") (f) (js/setTimeout g 100))))))
+
+(defn nums-string
+  "only nums in string"
+  [s]
+  (apply str (re-seq #"[0-9\.-]+" s)))
+
+(defn selected-fields [page header-negatives]
+  (let [
+        elements (map vector (range) (elements-on-page page))
+        grouped (group-by #(-> % second top) elements)
+        ]
+    (core/recompose-map
+     (for [[top line] grouped
+           :let [
+                 cols (sort-by (fn [[i element]]
+                                 (left element)) line)
+                 text (.trim (.toLowerCase (apply str (interpose " " (map #(text-content (second %)) cols)))))
+                 ]
+           [header negative?] header-negatives
+           :when (every? identity (map = text header))
+           :let [
+                 values (re-seq #"\S+" text)
+                 ]
+           :when (>= (count values) @import-column)
+           :let [
+                 value (nth values (- (count values) @import-column))
+                 [element-num subelement-num]
+                 (some identity
+                       (for [[element-num element] cols
+                             :when (-> element .-firstChild .-children)
+                             [subelement-num subelement]
+                             (map vector (range) (array-seq (.-children (.-firstChild element))))
+                             :when (= value (.trim (.-textContent subelement)))]
+                         [element-num subelement-num]))
+                 text-layer (.-parentElement (second (first cols)))
+                 page-height (.height (js/$ text-layer))
+                 page-frac (+ page (/ top page-height))
+                 ]]
+       [(str element-num) (str subelement-num)
+        {"value" (nums-string value)
+         "negative?" negative?
+         "page-frac" page-frac
+         "left-text" (.-textContent (second (first cols)))}]))))
+
+(defn set-fields-on-page [page]
+  (doseq [[field header-negatives] @report-hints]
+    (swap! report-values assoc-in [field (str page)] (selected-fields page header-negatives))))
+
+(defn ai [page]
+  (let [
+        page (or page @starting-page)
+        ]
+    (delay-f page #(do
+                     (set-fields-on-page page)
+                     (if
+                       (< page @ending-page) (ai (inc page))
+                       (set! js/PDFViewerApplication.page @starting-page)
+                       )))))
 
 (defn update-report-values []
   (POST "/update-report-values" {:params {:company @company
@@ -47,7 +124,7 @@
                    :background-color (if (= input @field) "yellow" "white")
                    :border "1px solid black"
                    }
-           :on-click #(set-field input)
+           :on-click #(reset! field input)
            } input
       " "
       (if (not= 0 num-positive)
@@ -94,7 +171,28 @@
     [:option "M"]][:br]
    [:input {:type "button"
             :value "Done"
-            :on-click #(reset! show-metadata? false)}]])
+            :on-click #(reset! menu-status :default)}]])
+
+(defn import-form []
+  [:div
+   "Starting Page "
+   [:input {:type "number"
+            :default-value @starting-page
+            :on-blur #(reset! starting-page (-> % .-target .-value js/Number))}] [:br]
+   "Ending Page "
+   [:input {:type "number"
+            :default-value @ending-page
+            :on-blur #(reset! ending-page (-> % .-target .-value js/Number))}] [:br]
+   "Import Column "
+   [:input {:type "number"
+            :default-value @import-column
+            :on-blur #(reset! import-column (-> % .-target .-value js/Number))}] [:br]
+   [:input {:type "button"
+            :value "Import"
+            :on-click #(do
+                         (reset! menu-status :default)
+                         (ai nil))}]
+   ])
 
 (defn position-div [page-frac negative?]
   [:div {:style {:width 15
@@ -123,26 +221,30 @@
             :padding 7
             }}
    [position-divs]
-   (if @show-metadata?
+   [:h3 @company]
+   (condp = @menu-status
+     :metadata
      [metadata-form]
+     :import
+     [import-form]
+     :default
      [:div
-      [:h3 @company]
       [:br]
       [:input {:type "button"
                :value "Show Metadata"
-               :on-click #(reset! show-metadata? true)}]
+               :on-click #(reset! menu-status :metadata)}]
       [:br]
-      [:table
-       [:thead]
-       [:tbody
-        (for [input @inputs]
-          ^{:key input}
-          [field-row input])]]])])
-
-(defn nums-string
-  "only nums in string"
-  [s]
-  (apply str (re-seq #"[0-9\.-]+" s)))
+      [:input {:type "button"
+               :value "Autofill"
+               :on-click #(reset! menu-status :import)}]
+      ])
+   [:br]
+   [:table
+    [:thead]
+    [:tbody
+     (for [input @inputs]
+       ^{:key input}
+       [field-row input])]]])
 
 (defn click-div [page element-num subelement-num word event]
   (let [
@@ -224,5 +326,7 @@
   (reset! field (first @inputs))
   (js/document.addEventListener "textlayerrendered" text-layer-rendered)
   (js/$ #(js/loadFile (core/format "/reports/%s/%s.pdf" @company @reporting-period)))
+  ;keep this one!
+  (.resize (js/$ js/window) set-height!)
   )
 

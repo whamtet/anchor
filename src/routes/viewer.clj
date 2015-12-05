@@ -9,6 +9,29 @@
 (require '[ring.util.response :as response])
 (import java.io.File)
 
+(defn get-matching-companies [company]
+  (let [
+        suffix (second (.split company "\\."))
+        ]
+    (filter #(= suffix (second (.split % "\\."))) (keys @model/report-values))))
+
+(defn clean-text [field]
+  (.trim (.toLowerCase field)))
+
+(defn get-report-hints [company reporting-period]
+  (util/recompose-map
+   (for [
+         company2 (get-matching-companies company)
+         [reporting-period2 fields] (get @model/report-values company2)
+;         :when (not= [company reporting-period] [company2 reporting-period2])
+         [field pages] fields
+         [page indices] pages
+         [index subindices] indices
+         [subindex {:strs [left-text negative?]}] subindices
+         :when left-text
+         ]
+     [field (clean-text left-text) negative?])))
+
 (defroutes routes
   (GET "/new-report" [company]
        (index/page ["new_report"] {
@@ -50,6 +73,7 @@
                                  "report_values" (pr-str (get-in @model/report-values [company reporting-period]))
                                  "report_metadata" (pr-str (get-in @model/report-metadata [company reporting-period]))
                                  "report_manuals" (pr-str (get-in @model/report-manuals [company reporting-period]))
+                                 "report_hints" (pr-str (get-report-hints company reporting-period))
                                  })))))
   (POST "/update-report-values" [company reporting-period report-values report-manuals]
         (swap! model/report-values assoc-in [company reporting-period] (util/clean report-values))

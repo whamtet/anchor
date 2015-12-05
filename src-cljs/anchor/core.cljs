@@ -82,3 +82,9 @@
 
 (defn max-by [f s]
   (min-by #(- (f %)) s))
+
+(defn recompose-map
+  ([vs] (recompose-map {} vs))
+  ([m vs]
+   (reduce (fn [m v]
+             (assoc-in m (pop v) (peek v))) m vs)))
