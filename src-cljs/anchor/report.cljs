@@ -57,6 +57,6 @@
 (defn content []
   (page (table)))
 
-(defn main []
+(defn ^:export main []
   (.replaceWith (js/$ "#content")
                 (crate/html (content))))

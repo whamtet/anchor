@@ -3,6 +3,7 @@
    [ajax.core :refer [GET POST]]
    [reagent.core :as reagent :refer [atom]]
    [anchor.core :as core]
+   [anchor.params :as params]
    ))
 
 (def new-company (atom ""))
@@ -16,26 +17,23 @@
    [:input {:type "button"
             :value "Create"
             :on-click #(if (not= "" @new-company)
-                         (if (get @report-metadata @new-company)
+                         (if (get @params/report-metadata @new-company)
                            (js/alert "Company Exists")
                            (do
-                             (swap! report-metadata assoc @new-company {})
+                             (swap! params/report-metadata assoc @new-company {})
                              (reset! new-company "")
-                             (POST "/update-report-metadata" {:params {:report-metadata @report-metadata}}))))}]])
-
-(defn update-period-coefficients [company value]
-  (println "updating" company value))
+                             (POST "/update-report-metadata" {:params {:report-metadata @params/report-metadata}}))))}]])
 
 (defn delete-company [company reporting-periods]
   (if (not-empty reporting-periods)
     (js/alert "Delete Reports First")
     (do
-      (swap! report-metadata dissoc company)
+      (swap! params/report-metadata dissoc company)
       (POST "/delete-company" {:params {:company company}}))))
 
 (defn delete-report [company reporting-period]
   (when (js/confirm (core/format "Delete %s %s ?" company reporting-period))
-    (swap! report-metadata core/dissoc-in [company reporting-period])
+    (swap! params/report-metadata core/dissoc-in [company reporting-period])
     (POST "/delete-report" {:params {:company company :reporting-period reporting-period}})))
 
 (defn report-line [company year month starting-year starting-month]
@@ -68,22 +66,22 @@
 
 (defn company-div [company]
   (let [
-        reporting-periods (get @report-metadata company)
+        reporting-periods (get @params/report-metadata company)
         ]
     [:div
      [:a {:href
           (core/url "/program-graph" {:company company})
           :target "_blank"}
-      [:b (get @company-names company company)]] " "
+      [:b (get @params/company-names company company)]] " "
      [:input {:type "button"
               :value "Delete"
               :on-click #(delete-company company reporting-periods)}][:br][:br]
      "Report Combination "
      [:input {:type "text"
-              :default-value (get @period-coefficients company)
+              :default-value (get @params/period-coefficients company)
               :on-blur #(do
-                          (swap! period-coefficients assoc company (-> % .-target .-value))
-                          (POST "/update-period-coefficients" {:params {:period-coefficients @period-coefficients}}))
+                          (swap! params/period-coefficients assoc company (-> % .-target .-value))
+                          (POST "/update-period-coefficients" {:params {:period-coefficients @params/period-coefficients}}))
               }] [:br] [:br]
      (for [[reporting-period {:strs [year month starting-year starting-month]}]
            (sort-by date-val reporting-periods)]
@@ -105,10 +103,10 @@
    [:h2 "Data Entry"]
    [new-company-form]
    [:h3 "Companies"]
-   (for [company (sort-companies (keys @report-metadata))]
+   (for [company (sort-companies (keys @params/report-metadata))]
      ^{:key company}
      [company-div company])
    ])
 
-(defn main []
+(defn ^:export main []
   (core/page content))

@@ -4,6 +4,7 @@
    [ajax.core :refer [GET POST]]
    [reagent.core :as reagent :refer [atom]]
    [clojure.walk :as walk]
+   [anchor.params :as params]
    ))
 
 (defn subitem? [a b]
@@ -32,7 +33,7 @@
     (let [
           [_g m-g [_ m-ellipse] [_ m-text1 text1] [_ m-text2 text2]] item
           field (core/replace-all text1 " " "-")
-          value (get @values field)
+          value (get @params/values field)
           value (cond
                  (not (number? value)) value
                  (zero? value) 0
@@ -45,10 +46,10 @@
           on-click #(open-dialog field)
           fill (colors
                 (cond
-                 (get @manual-values field) "manual"
-                 (@final-output field) "combo"
-                 (@automatic-input field) "sector"
-                 (@manual-input field) "report"
+                 (get @params/manual-values field) "manual"
+                 (@params/final-output field) "combo"
+                 (@params/automatic-input field) "sector"
+                 (@params/manual-input field) "report"
                  :default "calc"))
           ]
       [:g (assoc m-g :on-click on-click) ;[:title (@equations text1)]
@@ -58,8 +59,8 @@
 (defn close-dialog []
   (let [
         ]
-    (POST "/update-manual-values" {:params {:manual-values (core/value-map js/Number @manual-values) :company @company}
-                                   :handler #(reset! values %)
+    (POST "/update-manual-values" {:params {:manual-values (core/value-map js/Number @params/manual-values) :company @params/company}
+                                   :handler #(reset! params/values %)
                                    })
     (-> "node_dialog" js/document.getElementById .close)))
 
@@ -73,7 +74,7 @@
 
 (defn dialog []
   (let [
-        value (get @manual-values @field)
+        value (get @params/manual-values @field)
         ]
     [:dialog {:id "node_dialog"
               :style {:left 0
@@ -82,14 +83,14 @@
                       :width 200
                       }}
      [:div
-      [:input {:type "radio" :name "rad" :checked (not value) :on-change #(swap! manual-values dissoc @field)}] "Default" [:br]
-      [:input {:type "radio" :name "rad" :checked (boolean value) :on-change #(swap! manual-values assoc @field "")}] "Override" [:br]
-      [:input {:type "number" :value (or value "") :on-change #(swap! manual-values assoc @field (-> % .-target .-value))}] [:br]
+      [:input {:type "radio" :name "rad" :checked (not value) :on-change #(swap! params/manual-values dissoc @field)}] "Default" [:br]
+      [:input {:type "radio" :name "rad" :checked (boolean value) :on-change #(swap! params/manual-values assoc @field "")}] "Override" [:br]
+      [:input {:type "number" :value (or value "") :on-change #(swap! params/manual-values assoc @field (-> % .-target .-value))}] [:br]
       [:input {:type "button" :on-click close-dialog :value "Close"}]]]))
 
 (defn content []
   (let [
-        svg (walk/postwalk clean-vector @graph)
+        svg (walk/postwalk clean-vector @params/graph)
         svg (assoc-in svg [1 :viewBox] "450 0.00 3000 1100")
         ]
     [:div
@@ -97,6 +98,6 @@
      svg
      ]))
 
-(defn main []
+(defn ^:export main []
   (core/page
    content))

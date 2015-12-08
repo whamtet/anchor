@@ -1,17 +1,21 @@
 (ns anchor.core
   (:require [reagent.core :as reagent]
             [goog.string :as gstring]
+            [cljs.reader :as reader]
             ))
+
+(def ^:export read-string reader/read-string)
+(def ^:export atom reagent/atom)
 
 (enable-console-print!)
 
 (def space (gstring/unescapeEntities "&nbsp;"))
 
-(def bind-variable
+(def ^:export bind-variable
   (js/Function. "klass" "k"
                 "
                 var value = document.getElementById(k).value;
-                anchor[klass][k] = reagent.core.atom(cljs.reader.read_string(value))
+                anchor.params[k] = anchor.core.atom(anchor.core.read_string(value))
                 "))
 
 (defn value-map [f m]
@@ -22,7 +26,7 @@
    [contents]
    (js/document.getElementById "content")))
 
-(defn p [x]
+(defn ^:export p [x]
   (prn @x))
 
 (defn key-filter [f m]

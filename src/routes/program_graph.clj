@@ -18,11 +18,9 @@
                         :node->descriptor node-descriptor
                         :vertical? false
                         :options {:size 30 ;inches
-                                  }
-                        ))
+                                  }))
 
 (def clj-graph (svg-to-edn/parse im))
-
 
 (defroutes routes
   (GET "/program-graph" [company reporting-period]

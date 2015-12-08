@@ -3,6 +3,7 @@
    [ajax.core :refer [GET POST]]
    [reagent.core :as reagent :refer [atom]]
    [anchor.core :as core]
+   [anchor.params :as params]
    ))
 
 (def sorted-inputs (atom nil))
@@ -54,10 +55,10 @@
            input]])]]])
 
 (defn input-selector [input]
-  [:select {:value (get @node-types input "Income Statement")
+  [:select {:value (get @params/node-types input "Income Statement")
             :on-change #(do
-                          (swap! node-types assoc input (-> % .-target .-value))
-                          (POST "/update-node-types" {:params {:node-types @node-types}}))}
+                          (swap! params/node-types assoc input (-> % .-target .-value))
+                          (POST "/update-node-types" {:params {:node-types @params/node-types}}))}
    [:option "Income Statement"]
    [:option "Balance Sheet"]])
 
@@ -79,9 +80,9 @@
    [input-order]
    [input-types-selector]])
 
-(defn main []
+(defn ^:export main []
   (reset! sorted-inputs
-          (if @node-order
-            (sort-by #(@node-order % 0) @input)
-            @input))
+          (if @params/node-order
+            (sort-by #(@params/node-order % 0) @params/input)
+            @params/input))
   (core/page content))

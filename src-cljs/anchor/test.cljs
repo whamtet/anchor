@@ -16,5 +16,5 @@
    [:input {:type "button" :value "Click me!"
             :on-click #(swap! click-count inc)}]])
 
-(defn main []
+(defn ^:export main []
   (core/page counting-component))

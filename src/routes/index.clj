@@ -29,9 +29,7 @@
       [:script {:src "/jquery.js"}]
       [:script {:src "/cljs/out/goog/base.js"}]
       [:script {:src "/cljs/out.js"}]
-      [:script {:src "/react-0.12.0.js"}]
       [:script (format "
-                       goog.require('cljs.reader')
                        %s
                        $(function() {
                        c = anchor.core

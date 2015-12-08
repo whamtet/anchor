@@ -5,6 +5,7 @@
    [anchor.core :as core]
    [crate.core :as crate]
    [clojure.data :as data]
+   [anchor.params :as params]
    ))
 
 (def field (atom nil))
@@ -29,6 +30,12 @@
 (defn text-content [element]
   (.-textContent element))
 
+(defn update-report-values []
+  (POST "/update-report-values" {:params {:company @params/company
+                                          :reporting-period @params/reporting-period
+                                          :report-values @params/report-values
+                                          :report-manuals @params/report-manuals}}))
+
 (defn delay-f
   "visits page, waits for load then executes"
   [page f]
@@ -37,7 +44,7 @@
         element (js/document.getElementById (str "pageContainer" page))
         ]
     ((fn g []
-       (if (.hasAttribute element "data-loaded") (f) (js/setTimeout g 100))))))
+       (if (.hasAttribute element "data-loaded") (js/setTimeout f 1000) (js/setTimeout g 100))))))
 
 (defn nums-string
   "only nums in string"
@@ -72,6 +79,9 @@
                              (map vector (range) (array-seq (.-children (.-firstChild element))))
                              :when (= value (.trim (.-textContent subelement)))]
                          [element-num subelement-num]))
+                 ]
+           :when subelement-num
+           :let [
                  text-layer (.-parentElement (second (first cols)))
                  page-height (.height (js/$ text-layer))
                  page-frac (+ page (/ top page-height))
@@ -83,8 +93,8 @@
          "left-text" (.-textContent (second (first cols)))}]))))
 
 (defn set-fields-on-page [page]
-  (doseq [[field header-negatives] @report-hints]
-    (swap! report-values assoc-in [field (str page)] (selected-fields page header-negatives))))
+  (doseq [[field header-negatives] @params/report-hints]
+    (swap! params/report-values assoc-in [field (str page)] (selected-fields page header-negatives))))
 
 (defn ai [page]
   (let [
@@ -94,25 +104,21 @@
                      (set-fields-on-page page)
                      (if
                        (< page @ending-page) (ai (inc page))
-                       (set! js/PDFViewerApplication.page @starting-page)
+                       (do
+                         (set! js/PDFViewerApplication.page @starting-page)
+                         (update-report-values))
                        )))))
 
-(defn update-report-values []
-  (POST "/update-report-values" {:params {:company @company
-                                          :reporting-period @reporting-period
-                                          :report-values @report-values
-                                          :report-manuals @report-manuals}}))
-
 (defn clear-field [to-clear]
-  (swap! report-values dissoc to-clear)
-  (swap! report-manuals dissoc to-clear)
+  (swap! params/report-values dissoc to-clear)
+  (swap! params/report-manuals dissoc to-clear)
   (update-report-values))
 
 (defn field-row [input]
   (let [
         {t true f false}
         (group-by identity
-                  (for [[page indices] (get @report-values input)
+                  (for [[page indices] (get @params/report-values input)
                         [index subindices] indices
                         [subindex {negative? "negative?"}] subindices]
                     negative?))
@@ -136,35 +142,35 @@
                :on-click #(clear-field input)}] [:br]
 
       [:input {:type "input"
-               :value (get @report-manuals input "")
-               :on-change #(swap! report-manuals assoc input (-> % .-target .-value))
+               :value (get @params/report-manuals input "")
+               :on-change #(swap! params/report-manuals assoc input (-> % .-target .-value))
                :on-blur update-report-values}]
       ]]))
 
 (defn metadata-listener [k]
   #(do
-     (swap! report-metadata assoc k (-> % .-target .-value))
-     (POST "/update-report-metadata2" {:params {:report-metadata @report-metadata
-                                                :company @company
-                                                :reporting-period @reporting-period}})))
+     (swap! params/report-metadata assoc k (-> % .-target .-value))
+     (POST "/update-report-metadata2" {:params {:report-metadata @params/report-metadata
+                                                :company @params/company
+                                                :reporting-period @params/reporting-period}})))
 
 (defn metadata-form []
   [:div
    [:p "Metadata"]
    "Starting Year "
-   [:select {:value (get @report-metadata "starting-year")
+   [:select {:value (get @params/report-metadata "starting-year")
              :on-change (metadata-listener "starting-year")}
     (for [year (range 2000 2020)]
       ^{:key year}
       [:option year])]
    " Starting Month "
-   [:select {:value (get @report-metadata "starting-month")
+   [:select {:value (get @params/report-metadata "starting-month")
              :on-change (metadata-listener "starting-month")}
     (for [month (range 1 13)]
       ^{:key month}
       [:option month])]
    " Factor "
-   [:select {:value (get @report-metadata "factor")
+   [:select {:value (get @params/report-metadata "factor")
              :on-change (metadata-listener "factor")}
     [:option "1"]
     [:option "k"]
@@ -204,7 +210,7 @@
 
 (defn position-divs []
   [:div
-   (for [[page indices] (get @report-values @field)
+   (for [[page indices] (get @params/report-values @field)
          [index subindices] indices
          [subindex {:strs [page-frac negative?]}] subindices
          :when page-frac
@@ -221,7 +227,7 @@
             :padding 7
             }}
    [position-divs]
-   [:h3 @company]
+   [:h3 @params/company]
    (condp = @menu-status
      :metadata
      [metadata-form]
@@ -242,21 +248,21 @@
    [:table
     [:thead]
     [:tbody
-     (for [input @inputs]
+     (for [input @params/inputs]
        ^{:key input}
        [field-row input])]]])
 
 (defn click-div [page element-num subelement-num word event]
   (let [
         word (nums-string word)
-        {negative? "negative?" :as m} (get-in @report-values [@field (str page) (str element-num) (str subelement-num)])
+        {negative? "negative?" :as m} (get-in @params/report-values [@field (str page) (str element-num) (str subelement-num)])
 
         parent-div (-> event .-target .-parentElement .-parentElement)
         text-layer (.-parentElement parent-div)
         parent-height (-> parent-div .-style .-top)
 
         matching-elements (filter #(-> % .-style .-top (= parent-height)) (array-seq (.-children text-layer)))
-        leftmost-element (core/min-by #(-> % .-style .-left (.replace "px" "") js/Number) matching-elements)
+        leftmost-element (core/min-by left matching-elements)
         left-text (.-textContent leftmost-element)
 
         x (-> parent-div .-style .-top (.replace "px" "") js/Number)
@@ -265,11 +271,11 @@
         ]
     (cond
      negative?
-     (swap! report-values core/dissoc-in-all [@field (str page) (str element-num) (str subelement-num)])
+     (swap! params/report-values core/dissoc-in-all [@field (str page) (str element-num) (str subelement-num)])
      m
-     (swap! report-values assoc-in [@field (str page) (str element-num) (str subelement-num) "negative?"] true)
+     (swap! params/report-values assoc-in [@field (str page) (str element-num) (str subelement-num) "negative?"] true)
      :default
-     (swap! report-values assoc-in [@field (str page) (str element-num) (str subelement-num)] {
+     (swap! params/report-values assoc-in [@field (str page) (str element-num) (str subelement-num)] {
                                                                                                "value" word "negative?" false
                                                                                                "left-text" left-text
                                                                                                "page-frac" page-frac
@@ -282,7 +288,7 @@
 
 (defn snippetlet2 [page-num element-num subelement-num word]
   (let [
-        {:strs [value negative?]} (get-in @report-values [@field (str page-num) (str element-num) (str subelement-num)])
+        {:strs [value negative?]} (get-in @params/report-values [@field (str page-num) (str element-num) (str subelement-num)])
         ]
     [:span
      {:style {:background-color (if value "white")
@@ -322,10 +328,10 @@
     (core/page content))
   (-> event .-detail .-pageNumber add-click-listeners))
 
-(defn main []
-  (reset! field (first @inputs))
+(defn ^:export main []
+  (reset! field (first @params/inputs))
   (js/document.addEventListener "textlayerrendered" text-layer-rendered)
-  (js/$ #(js/loadFile (core/format "/reports/%s/%s.pdf" @company @reporting-period)))
+  (js/$ #(js/loadFile (core/format "/reports/%s/%s.pdf" @params/company @params/reporting-period)))
   ;keep this one!
   (.resize (js/$ js/window) set-height!)
   )

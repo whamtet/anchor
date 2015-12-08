@@ -8,7 +8,6 @@
             ))
 
 (defroutes routes
-
   (GET "/portfolio-allocation" []
        (index/page ["allocation"] {
                                    "company_names" (pr-str (yahoo/company-names (keys @model/report-metadata)))
@@ -19,5 +18,4 @@
               country-mins (util/clean country-mins)
               country-maxs (util/clean country-maxs)
               ]
-          (util/pr-response (optimize/optimize country-mins country-maxs stock-max risk-weighting))))
-  )
+          (util/pr-response (optimize/optimize country-mins country-maxs stock-max risk-weighting)))))

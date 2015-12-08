@@ -3,7 +3,9 @@
    [ajax.core :refer [GET POST]]
    [reagent.core :as reagent :refer [atom]]
    [anchor.core :as core]
-   ))
+   [anchor.params :as params]
+   )
+  )
 
 (def countries ["Australia" "Singapore" "Hong Kong"])
 
@@ -62,7 +64,7 @@
 
 (defn results-row [company weighting]
   [:tr
-   [:td [:b (get @company-names company)]]
+   [:td [:b (get @params/company-names company)]]
    [:td (.toFixed weighting 2)]])
 
 (defn results []
@@ -91,11 +93,12 @@
                                                    :risk-weighting @risk-weighting
                                                    }
                                           :handler (fn [x] (reset! results-atom x))
-                                          :error-handler prn
-                                          })}]
+                                          :error-handler prn})
+            }
+    ]
    [results]
    ])
 
 
-(defn main []
+(defn ^:export main []
   (core/page content))

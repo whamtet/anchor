@@ -49,9 +49,9 @@
 
 (def final-output (apply clojure.set/difference output (vals dependencies)))
 
-(defn add-output [input-map]
+(defn add-output [company input-map]
   (doseq [arg input]
-    (assert (input-map (str arg)) arg))
+    (assert (input-map (str arg)) (str company " " arg)))
   (let [
         defined-vars (set (map symbol (keys input-map)))
         model (mapcat (fn [[a b]]

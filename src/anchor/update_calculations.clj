@@ -85,4 +85,6 @@
 (defn nums
   ([] (nums (keys @model/report-metadata)))
   ([companies]
-   (util/value-map model/add-output (inputs companies))))
+   (into {}
+         (map (fn [[company input]]
+                [company (model/add-output company input)]) (inputs companies)))))

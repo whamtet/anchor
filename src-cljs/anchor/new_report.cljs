@@ -27,11 +27,11 @@
 
 (defn content []
   [:div
-   [:h3 "New Report for " @company]
+   [:h3 "New Report for " @params/company]
    [:form {:method "POST" :action "/new-report"
            :on-submit submit :enc-type "multipart/form-data"
            }
-    [:input {:type "hidden" :name "company" :value @company}]
+    [:input {:type "hidden" :name "company" :value @params/company}]
     "Factor "
     [:select {:default-value "k"
               :name "factor"}
@@ -83,5 +83,5 @@
              :on-change #(reset! url (-> % .-target .-value))}] [:br][:br]
     [:input {:type "submit"}]]])
 
-(defn main []
+(defn ^:export main []
   (core/page content))

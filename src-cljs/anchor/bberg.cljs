@@ -2,6 +2,7 @@
   (:require
    [reagent.core :as reagent :refer [atom]]
    [anchor.core :as core]
+   [anchor.params :as params]
    ))
 
 (def update-selector '{nil + + - - nil})
@@ -28,7 +29,7 @@
 (defn section [header]
   [:div
    [:h3 (str header)]
-   (for [line (.split (get @lines header) "\n")]
+   (for [line (.split (get @params/lines header) "\n")]
      ^{:key line}
      [line-div line])
    ])
@@ -45,7 +46,7 @@
                  :right 10
                  :position "fixed"
                  :border "1px solid black"}}
-   (for [phield @fields]
+   (for [phield @params/fields]
      ^{:key phield}
      [field-selector phield])])
 
@@ -54,10 +55,10 @@
    [field-selectors]
    [:h4 {:style {:color "gray"}}
     "NB: Sample Only.  Access to data requires Bloomberg License"]
-   (for [header @headers]
+   (for [header @params/headers]
      ^{:key header}
      [section header])])
 
-(defn main []
-  (reset! field (first @fields))
+(defn ^:export main []
+  (reset! field (first @params/fields))
   (core/page content))
