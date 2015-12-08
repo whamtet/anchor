@@ -30,4 +30,6 @@
   :plugins [[environ/environ.lein "0.2.1"]]
   :hooks [environ.leiningen.hooks]
   :uberjar-name "anchor-standalone.jar"
-  :profiles {:production {:env {:production true}}})
+  :profiles {:production {:env {:production true}}}
+  :jvm-opts ["-Djava.awt.headless=true"]
+)
