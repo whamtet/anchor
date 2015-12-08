@@ -15,7 +15,7 @@
   (js/Function. "klass" "k"
                 "
                 var value = document.getElementById(k).value;
-                anchor.params[k] = anchor.core.atom(anchor.core.read_string(value))
+                anchor.params['set_' + k](anchor.core.read_string(value))
                 "))
 
 (defn value-map [f m]

@@ -22,7 +22,10 @@
 (def forms (mapcat extract-route routes))
 
 (def params (format "
-                    (ns anchor.params)
+                    (ns anchor.params
+                    (:require
+   [reagent.core :as reagent :refer [atom]]
+   ))
                     %s"
                     (apply str
                            (interpose "\n"
@@ -30,7 +33,8 @@
                                        (map
                                         (fn [[ns syms]]
                                           [(str ";" ns)
-                                           (map #(format "(def ^:export %s nil)" %) syms)])
+                                           (map #(format "(def %s (atom nil)) (defn ^:export set-%s [x] (reset! %s x))
+                                                         " % % %) syms)])
                                         forms
                                         ))))))
 
@@ -50,6 +54,6 @@
                       {:output-to "resources/public/cljs/out.js"
                        :warnings false
                        :output-dir "resources/public/cljs/out"
-                       ;                       :optimizations :advanced
+                       :optimizations :advanced
                        :source-map "resources/public/cljs/out.js.map"
                        })
