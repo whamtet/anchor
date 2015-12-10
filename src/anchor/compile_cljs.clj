@@ -18,42 +18,39 @@
 (defn extract-route [route]
   (extract-form (slurp-route route)))
 
-(def routes (filter #(.endsWith (.getName %) ".clj") (file-seq (java.io.File. "src/routes"))))
-(def forms (mapcat extract-route routes))
-
-(def params (format "
-                    (ns anchor.params
-                    (:require
-   [reagent.core :as reagent :refer [atom]]
-   ))
-                    %s"
-                    (apply str
-                           (interpose "\n"
-                                      (flatten
-                                       (map
-                                        (fn [[ns syms]]
-                                          [(str ";" ns)
-                                           (map #(format "(def %s (atom nil)) (defn ^:export set-%s [x] (reset! %s x))
-                                                         " % % %) syms)])
-                                        forms
-                                        ))))))
-
-(spit "src-cljs/anchor/params.cljs" params)
-
-#_(defn assert-file [[file syms]]
+(defn spit-changes [f s]
   (let [
-        flat (set (flatten (read-string (format "[%s]" (slurp (format "src-cljs/anchor/%s.cljs" file))))))
-        syms (set syms)
-        u (clojure.set/intersection flat syms)
+        old (try (slurp f) (catch Exception e))
         ]
-    (if-not (empty? u) (println file u))))
+    (if (not= s old) (spit f s))))
 
-;(dorun (map assert-file forms))
-
-(cljs.build.api/build "src-cljs"
-                      {:output-to "resources/public/cljs/out.js"
-                       :warnings false
-                       :output-dir "resources/public/cljs/out"
-                       :optimizations :advanced
-                       :source-map "resources/public/cljs/out.js.map"
-                       })
+(defn compile-cljs []
+  (let [
+        routes (filter #(.endsWith (.getName %) ".clj") (file-seq (java.io.File. "src/routes")))
+        forms (mapcat extract-route routes)
+        params (format "
+                       (ns anchor.params
+                       (:require
+                       [reagent.core :as reagent :refer [atom]]
+                       ))
+                       %s"
+                       (apply str
+                              (interpose "\n"
+                                         (flatten
+                                          (map
+                                           (fn [[ns syms]]
+                                             [(str ";" ns)
+                                              (map #(format "(def ^:export %s (atom nil)) (defn ^:export set-%s [x] (reset! %s x))
+                                                            " % % %) syms)])
+                                           forms
+                                           )))))
+        ]
+    (println "compiling")
+    (spit-changes "src-cljs/anchor/params.cljs" params)
+    (cljs.build.api/build "src-cljs"
+                          {:output-to "resources/public/cljs/out.js"
+                           :warnings false
+                           :output-dir "resources/public/cljs/out"
+                           :optimizations :advanced
+                           :source-map "resources/public/cljs/out.js.map"
+                           })))

@@ -90,3 +90,13 @@
 
 (defn clean-up-map [m]
   (walk/postwalk clean-up m))
+
+(defn clean-empty [m]
+  (if (map? m)
+    (let [
+          m (into {}
+                  (for [[k v] m :let [v (clean-empty v)] :when (and k v)]
+                    [k v]))
+          ]
+      (if-not (empty? m) m))
+    m))

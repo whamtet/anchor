@@ -17,6 +17,7 @@
             [routes.bberg :as bberg]
             [routes.viewer :as viewer]
             [routes.allocation :as allocation]
+            [anchor.compile-cljs :as compile-cljs]
             ))
 
 (defroutes app
@@ -56,4 +57,5 @@
 
 ;; For interactive development:
 ;; (.stop server)
+(compile-cljs/compile-cljs)
 (defonce server (-main))
