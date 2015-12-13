@@ -3,6 +3,16 @@
 (require '[clojure.java.io :as io])
 (import java.util.Calendar)
 
+(def months ["Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec"])
+
+(defn timestamp []
+  (let [
+        cal (Calendar/getInstance)
+        appendo #(if (< % 10) (str "0" %) %)
+        ]
+    (str (.get cal Calendar/HOUR_OF_DAY) ":" (appendo (.get cal Calendar/MINUTE)) " "
+         (.get cal Calendar/DATE) " " (months (.get cal Calendar/MONTH)) " " (.get cal Calendar/YEAR))))
+
 (defn recompose-map
   ([vs] (recompose-map {} vs))
   ([m vs]
@@ -20,8 +30,6 @@
 
 (defn map-by [f s]
   (zipmap (map f s) s))
-
-(def months ["Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec"])
 
 (defn datestamp []
   (let [

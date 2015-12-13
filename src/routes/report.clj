@@ -4,6 +4,7 @@
             [anchor.model :as model]
             [anchor.util :as util]
             [anchor.update-calculations :as update-calculations]
+            [pdf.report :as report]
             ))
 
 (require '[clojure.java.io :as io])
@@ -14,14 +15,6 @@
 (import java.util.Calendar)
 
 (def months ["Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec"])
-
-(defn timestamp []
-  (let [
-        cal (Calendar/getInstance)
-        appendo #(if (< % 10) (str "0" %) %)
-        ]
-    (str (.get cal Calendar/HOUR_OF_DAY) ":" (appendo (.get cal Calendar/MINUTE)) " "
-         (.get cal Calendar/DATE) " " (months (.get cal Calendar/MONTH)) " " (.get cal Calendar/YEAR))))
 
 (.mkdir (File. "temp"))
 
@@ -42,11 +35,12 @@
        (index/blank-page ["report"]
                          {
                           "values" (pr-str (update-calculations/nums (keys @model/report-metadata)))
-                          "timestamp" (pr-str (timestamp))
+                          "timestamp" (pr-str (util/timestamp))
                           }))
   (GET "/valuation-report" []
        (let [
-             bytes (get-binary)
+  ;           bytes (get-binary)
+             bytes (report/pdf)
              ]
          {:status 200
           :headers {"Content-Type" "application/pdf"

@@ -57,5 +57,4 @@
 
 ;; For interactive development:
 ;; (.stop server)
-(compile-cljs/compile-cljs)
 (defonce server (-main))

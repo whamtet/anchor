@@ -25,6 +25,8 @@
                  [jayq "2.5.1"]
                  [cljs-ajax "0.2.6"]
                  [reagent "0.5.1"]
+
+                 [clj-pdf "2.1.6"]
                  ]
   :min-lein-version "2.0.0"
   :plugins [[environ/environ.lein "0.2.1"]]
@@ -32,4 +34,6 @@
   :uberjar-name "anchor-standalone.jar"
   :profiles {:production {:env {:production true}}}
   :jvm-opts ["-Djava.awt.headless=true"]
+  :aliases
+  {"build" ["trampoline" "run" "-m" "anchor.compile-cljs"]}
 )

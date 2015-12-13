@@ -36,10 +36,13 @@
                                           :report-values @params/report-values
                                           :report-manuals @params/report-manuals}}))
 
+(defn goto-page [page]
+  (set! js/PDFViewerApplication.page page))
+
 (defn delay-f
   "visits page, waits for load then executes"
   [page f]
-  (set! js/PDFViewerApplication.page page)
+  (goto-page page)
   (let [
         element (js/document.getElementById (str "pageContainer" page))
         ]
@@ -70,7 +73,10 @@
                  ]
            :when (>= (count values) @import-column)
            :let [
-                 value (nth values (- (count values) @import-column))
+                 value (nums-string (nth values (- (count values) @import-column)))
+                 ]
+           :when (not-empty value)
+           :let [
                  [element-num subelement-num]
                  (some identity
                        (for [[element-num element] cols
@@ -87,14 +93,17 @@
                  page-frac (+ page (/ top page-height))
                  ]]
        [(str element-num) (str subelement-num)
-        {"value" (nums-string value)
+        {"value" value
          "negative?" negative?
          "page-frac" page-frac
          "left-text" (.-textContent (second (first cols)))}]))))
 
 (defn set-fields-on-page [page]
-  (doseq [[field header-negatives] @params/report-hints]
-    (swap! params/report-values assoc-in [field (str page)] (selected-fields page header-negatives))))
+  (doseq [[field header-negatives] @params/report-hints
+          :let [x (selected-fields page header-negatives)]
+          :when (not-empty x)
+          ]
+    (swap! params/report-values assoc-in [field (str page)] x)))
 
 (defn ai [page]
   (let [
@@ -105,7 +114,7 @@
                      (if
                        (< page @ending-page) (ai (inc page))
                        (do
-                         (set! js/PDFViewerApplication.page @starting-page)
+                         (goto-page @starting-page)
                          (update-report-values))
                        )))))
 
@@ -192,12 +201,20 @@
    "Import Column "
    [:input {:type "number"
             :default-value @import-column
-            :on-blur #(reset! import-column (-> % .-target .-value js/Number))}] [:br]
+            :on-blur #(reset! import-column (-> % .-target .-value js/Number))}] [:br] [:br]
    [:input {:type "button"
             :value "Import"
             :on-click #(do
                          (reset! menu-status :default)
-                         (ai nil))}]
+                         (ai nil))}] " "
+   [:input {:type "button"
+            :value "Clear All"
+            :on-click #(do
+                         (reset! params/report-values {})
+                         (update-report-values))}] " "
+   [:input {:type "button"
+            :value "Cancel"
+            :on-click #(reset! menu-status :default)}]
    ])
 
 (defn position-div [page-frac negative?]
@@ -320,13 +337,23 @@
                      element)))
                 (elements-on-page page-index))))
 
+(defn goto-first-page []
+  (let [
+        all-pages (map int (mapcat keys (vals @params/report-values)))
+        ]
+    (if (not-empty all-pages)
+      (goto-page (apply min all-pages)))))
+
+(def get-page-number (js/Function. "event" "return event.detail.pageNumber"))
+
 (def render-virgin? (cljs.core/atom true))
 (defn text-layer-rendered [event]
   (when @render-virgin?
+    (goto-first-page)
     (reset! render-virgin? false)
     (set-height!)
     (core/page content))
-  (-> event .-detail .-pageNumber add-click-listeners))
+  (-> event get-page-number add-click-listeners))
 
 (defn ^:export main []
   (reset! field (first @params/inputs))

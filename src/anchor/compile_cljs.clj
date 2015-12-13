@@ -47,10 +47,13 @@
         ]
     (println "compiling")
     (spit-changes "src-cljs/anchor/params.cljs" params)
-    (cljs.build.api/build "src-cljs"
+    (cljs.build.api/watch "src-cljs"
                           {:output-to "resources/public/cljs/out.js"
                            :warnings false
                            :output-dir "resources/public/cljs/out"
-                           :optimizations :advanced
+;                           :optimizations :advanced
                            :source-map "resources/public/cljs/out.js.map"
                            })))
+
+(defn -main [& args]
+  (compile-cljs))
