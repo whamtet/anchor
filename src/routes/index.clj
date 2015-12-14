@@ -21,12 +21,11 @@
         shorthands (map-str #(format "%s = anchor.%s" % %) classes)
         ]
     [:div
-     [:link {:rel "stylesheet" :type "text/css" :href "/style.css"}]
       [:div {:id "content"}]
       [:script {:src "/keymaster.js"}]
       [:script {:src "/jquery.js"}]
       [:script {:src "/bundle.js"}]
-;      [:script {:src "/cljs/out/goog/base.js"}]
+      [:script {:src "/cljs/out/goog/base.js"}]
       [:script {:src "/cljs/out.js"}]
       (for [script scripts]
         [:script {:src script}])
@@ -58,6 +57,9 @@
     [:head
       [:meta {:http-equiv "X-UA-Compatible" :content "IE=edge"}]
       [:meta {:charset "UTF-8"}]
+;      [:link {:rel "stylesheet" :type "text/css" :href "/templated-prism/assets/css/main.css"}]
+     [:link {:rel "stylesheet" :type "text/css" :href "/ms1.css"}]
+     [:link {:rel "stylesheet" :type "text/css" :href "/ms2.css"}]
      ]
     [:body
      anchor

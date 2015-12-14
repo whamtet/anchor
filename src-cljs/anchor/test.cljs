@@ -15,16 +15,6 @@
    (.createElement js/React rc-slider #js{:value @v :onChange #(reset! v %)})
    ])
 
-(defn get-scripts [[script & rest] f]
-  (if script
-    (js/$.getScript script #(get-scripts rest f))
-    (f)))
-
 (defn ^:export main []
-  #_(js/$.getScript "node_modules/react-slider/react-slider.js"
-                  #(core/page content))
-  ;  (.render js/ReactDOM slider container)
   (core/page content)
-  ;(core/page2 slider)
-  ;(.render react-dom (.createElement js/React rc-slider) (js/document.getElementById "content"))
   )
