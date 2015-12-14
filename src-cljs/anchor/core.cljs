@@ -7,6 +7,9 @@
 (def ^:export read-string reader/read-string)
 (def ^:export atom reagent/atom)
 
+(set! js/window.React (js/require "react"))
+(set! js/window.ReactDOM (js/require "react-dom"))
+
 (enable-console-print!)
 
 (def space (gstring/unescapeEntities "&nbsp;"))
@@ -18,6 +21,13 @@
                 anchor.params['set_' + k](anchor.core.read_string(value))
                 "))
 
+(def add-script
+  (js/Function. "src"
+                "var s = document.createElement(\"script\");
+                s.type = \"text/javascript\";
+                s.src=src
+                document.head.appendChild(s)"))
+
 (defn value-map [f m]
   (zipmap (keys m) (map f (vals m))))
 
@@ -25,6 +35,9 @@
   (reagent/render-component
    [contents]
    (js/document.getElementById "content")))
+
+(defn page2 [contents]
+  (reagent/render-component contents (js/document.getElementById "content")))
 
 (defn ^:export p [x]
   (prn @x))

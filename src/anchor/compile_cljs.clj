@@ -51,8 +51,9 @@
                           {:output-to "resources/public/cljs/out.js"
                            :warnings false
                            :output-dir "resources/public/cljs/out"
-;                           :optimizations :advanced
+                           :optimizations :advanced
                            :source-map "resources/public/cljs/out.js.map"
+;                           :libs ["resources/public/bundle.js"]
                            })))
 
 (defn -main [& args]

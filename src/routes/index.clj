@@ -13,22 +13,23 @@
    [:script (format "%s anchor.%s.main();"
                     (map-str #(format "anchor.core.bind_variable('%s', '%s');" class %) (keys kvs)) class)]))
 
-;; remember these bitch
-;; [:link {:rel "stylesheet" :type "text/css" :href "/style.css"}]
-
 (defn injectoid
   "a snippet to pump in clojurescript"
-  [classes kvs]
+  [classes kvs & [scripts]]
   (let [
         requires (map-str #(format "goog.require('anchor.%s')" %) classes)
         shorthands (map-str #(format "%s = anchor.%s" % %) classes)
         ]
     [:div
+     [:link {:rel "stylesheet" :type "text/css" :href "/style.css"}]
       [:div {:id "content"}]
       [:script {:src "/keymaster.js"}]
       [:script {:src "/jquery.js"}]
-      [:script {:src "/cljs/out/goog/base.js"}]
+      [:script {:src "/bundle.js"}]
+;      [:script {:src "/cljs/out/goog/base.js"}]
       [:script {:src "/cljs/out.js"}]
+      (for [script scripts]
+        [:script {:src script}])
       [:script (format "
                        %s
                        $(function() {
@@ -38,8 +39,8 @@
       (state (first classes) kvs)]))
 
 (defn injectoid-s
-  [classes kvs]
-  (hiccup.core/html (injectoid classes kvs)))
+  [classes kvs & [scripts]]
+  (hiccup.core/html (injectoid classes kvs scripts)))
 
 (def anchor
   [:div
@@ -51,7 +52,7 @@
 
 (defn page
   "page with aforementioned snippet"
-  [classes kvs]
+  [classes kvs & [scripts]]
   (response/response
    (hiccup/html5
     [:head
@@ -60,13 +61,13 @@
      ]
     [:body
      anchor
-     (injectoid classes kvs)
+     (injectoid classes kvs scripts)
      ]
     )))
 
 (defn blank-page
   "page with aforementioned snippet"
-  [classes kvs]
+  [classes kvs & [scripts]]
   (response/response
    (hiccup/html5
     [:head
@@ -74,7 +75,7 @@
       [:meta {:charset "UTF-8"}]
      ]
     [:body
-     (injectoid classes kvs)
+     (injectoid classes kvs scripts)
      ]
     )))
 

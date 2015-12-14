@@ -24,8 +24,9 @@
                  [crate "0.2.4"]
                  [jayq "2.5.1"]
                  [cljs-ajax "0.2.6"]
-                 [reagent "0.5.1"]
-
+                 [reagent "0.5.1" :exclusions [cljsjs/react]
+                  ]
+                 ;[cljsjs/react "0.14.3-0"]
                  [clj-pdf "2.1.6"]
                  ]
   :min-lein-version "2.0.0"

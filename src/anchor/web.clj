@@ -21,8 +21,9 @@
             ))
 
 (defroutes app
-  (GET "/test" []
-       (index/page ["test"] {}))
+  (GET "/test" [] (index/page ["test"] {}
+;                              ["node_modules/react-slider/react-slider.js"]
+                              ))
   (route/resources "/")
   (ANY "*" []
        (route/not-found (slurp (io/resource "404.html")))))
