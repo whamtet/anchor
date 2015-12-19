@@ -20,7 +20,8 @@
                                    "report_metadata" (pr-str @model/report-metadata)
                                    "period_coefficients" (pr-str @model/period-coefficients)
                                    "company_names" (pr-str (yahoo/company-names (keys @model/report-metadata)))
-                                   }))
+                                   }
+                   ))
   (POST "/delete-report" [company reporting-period]
         (swap! model/report-metadata util/dissoc-in [company reporting-period])
         (swap! model/report-values util/dissoc-in [company reporting-period])
@@ -30,7 +31,8 @@
         (model/set-report-manuals)
         util/ok-response)
   (POST "/delete-company" [company]
-        (delete-company report-metadata report-values report-manuals company-sectors))
+        (delete-company report-metadata report-values report-manuals company-sectors company-metadata))
   (util/defupdate report-metadata)
   (util/defupdate period-coefficients)
+  (util/defupdate company-metadata)
   )

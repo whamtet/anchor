@@ -1,9 +1,13 @@
 (ns routes.index
-    (:require [compojure.core :refer [defroutes GET PUT POST DELETE ANY]]))
+  (:require [compojure.core :refer [defroutes GET PUT POST DELETE ANY]]))
 
+;(require '[anchor.html-unit :as html-unit])
+;(require '[anchor.get-images :as get-images])
 (require '[ring.util.response :as response])
 (require '[hiccup.page :as hiccup])
 (require 'hiccup.core)
+(require '[anchor.util :as util])
+(require '[anchor.model :as model])
 
 (defn map-str [f & s] (apply str (interpose "\n" (apply map f s))))
 
@@ -21,21 +25,20 @@
         shorthands (map-str #(format "%s = anchor.%s" % %) classes)
         ]
     [:div
-      [:div {:id "content"}]
-      [:script {:src "/keymaster.js"}]
-      [:script {:src "/jquery.js"}]
-      [:script {:src "/bundle.js"}]
-      [:script {:src "/cljs/out/goog/base.js"}]
-      [:script {:src "/cljs/out.js"}]
-      (for [script scripts]
-        [:script {:src script}])
-      [:script (format "
-                       %s
-                       $(function() {
-                       c = anchor.core
-                       %s
-                       })" requires shorthands)]
-      (state (first classes) kvs)]))
+     [:div {:id "content"}]
+     [:script {:src "/keymaster.js"}]
+     [:script {:src "/jquery.js"}]
+     [:script {:src "/cljs/out/goog/base.js"}]
+     [:script {:src "/cljs/out.js"}]
+     (for [script scripts]
+       [:script {:src script}])
+     [:script (format "
+                      %s
+                      $(function() {
+                      c = anchor.core
+                      %s
+                      })" requires shorthands)]
+     (state (first classes) kvs)]))
 
 (defn injectoid-s
   [classes kvs & [scripts]]
@@ -44,10 +47,14 @@
 (def anchor
   [:div
    [:a {:href "/"}
-   [:img {:src "/anchor.png"
-          :width 267
-          :height 200
-          }]]])
+    [:img {:src "/anchor.png"
+           :width 267
+           :height 200
+           }]]])
+
+(def css
+  (map #(vector :link {:rel "stylesheet" :type "text/css" :href %})
+       ["/toast/css.css" "/toast/d.css" "/toast/style.css"]))
 
 (defn page
   "page with aforementioned snippet"
@@ -55,11 +62,8 @@
   (response/response
    (hiccup/html5
     [:head
-      [:meta {:http-equiv "X-UA-Compatible" :content "IE=edge"}]
-      [:meta {:charset "UTF-8"}]
-;      [:link {:rel "stylesheet" :type "text/css" :href "/templated-prism/assets/css/main.css"}]
-     [:link {:rel "stylesheet" :type "text/css" :href "/ms1.css"}]
-     [:link {:rel "stylesheet" :type "text/css" :href "/ms2.css"}]
+     [:meta {:http-equiv "X-UA-Compatible" :content "IE=edge"}]
+     [:meta {:charset "UTF-8"}]
      ]
     [:body
      anchor
@@ -73,26 +77,10 @@
   (response/response
    (hiccup/html5
     [:head
-      [:meta {:http-equiv "X-UA-Compatible" :content "IE=edge"}]
-      [:meta {:charset "UTF-8"}]
+     [:meta {:http-equiv "X-UA-Compatible" :content "IE=edge"}]
+     [:meta {:charset "UTF-8"}]
      ]
     [:body
      (injectoid classes kvs scripts)
      ]
     )))
-
-(defroutes routes
-  (GET "/" []
-       (hiccup/html5
-        anchor
-        [:h3 "Data Entry"]
-        [:a {:href "/economic-sectors"} "Economic Sectors"][:br]
-        [:a {:href "/data-entry"} "Data Entry"][:br]
-        [:a {:href "/bberg"} "Bloomberg Data Entry"][:br]
-        [:h3 "Valuation"]
-        [:a {:href "/valuation-report"} "Valuation Report"][:br]
-        [:h3 "Portfolio Management"]
-        [:a {:href "/portfolio-allocation"} "Portfolio Allocation"][:br]
-        [:h3 "Settings"]
-        [:a {:href "/settings"} "Settings"]
-        )))

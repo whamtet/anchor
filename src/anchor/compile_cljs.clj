@@ -5,7 +5,7 @@
   (read-string (format "(list %s)" (slurp route))))
 
 (defn extract-form [form]
-  (if (list? form)
+  (if (or (list? form) (map? form))
     (cond
      (= 'defroutes (first form))
      (filter identity (map extract-form (drop 2 form)))
@@ -13,6 +13,7 @@
      [(first (second form))
       (map #(symbol (.replace % "_" "-"))
            (keys (nth form 2)))]
+     (map? form) (some extract-form (vals form))
      :default (some extract-form form))))
 
 (defn extract-route [route]
@@ -24,7 +25,7 @@
         ]
     (if (not= s old) (spit f s))))
 
-(defn compile-cljs []
+(defn compile-cljs [once?]
   (let [
         routes (filter #(.endsWith (.getName %) ".clj") (file-seq (java.io.File. "src/routes")))
         forms (mapcat extract-route routes)
@@ -44,17 +45,17 @@
                                                             " % % %) syms)])
                                            forms
                                            )))))
+        f (if once? cljs.build.api/build cljs.build.api/watch)
         ]
     (println "compiling")
     (spit-changes "src-cljs/anchor/params.cljs" params)
-    (cljs.build.api/watch "src-cljs"
-                          {:output-to "resources/public/cljs/out.js"
-                           :warnings false
-                           :output-dir "resources/public/cljs/out"
-                           :optimizations :advanced
-                           :source-map "resources/public/cljs/out.js.map"
-;                           :libs ["resources/public/bundle.js"]
-                           })))
+    (f "src-cljs"
+       {:output-to "resources/public/cljs/out.js"
+        :warnings false
+        :output-dir "resources/public/cljs/out"
+        ;                           :optimizations :advanced
+        :source-map "resources/public/cljs/out.js.map"
+        })))
 
-(defn -main [& args]
-  (compile-cljs))
+(defn -main [& [once?]]
+  (compile-cljs once?))

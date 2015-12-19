@@ -5,7 +5,7 @@
             :url "http://example.com/FIXME"}
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [compojure "1.1.8"]
-                 [ring/ring-jetty-adapter "1.2.2"]
+                 [ring/ring-jetty-adapter "1.4.0"]
                  [ring/ring-devel "1.2.2"]
                  [ring-basic-authentication "1.0.5"]
                  [environ "0.5.0"]
@@ -18,15 +18,16 @@
 
                  [clojure-csv/clojure-csv "2.0.1"]
                  [com.joptimizer/joptimizer "3.4.0"]
+                 #_[net.sourceforge.htmlunit/htmlunit "2.19" :exclusions [commons-logging org.apache.commons/commons-lang3]]
 
                  ;;cljs
                  [org.clojure/clojurescript "1.7.28"]
                  [crate "0.2.4"]
                  [jayq "2.5.1"]
                  [cljs-ajax "0.2.6"]
-                 [reagent "0.5.1" :exclusions [cljsjs/react]
+                 [reagent "0.6.0-SNAPSHOT"; :exclusions [cljsjs/react cljsjs/react-dom]
                   ]
-                 ;[cljsjs/react "0.14.3-0"]
+;                 [frankiesardo/linked "1.2.6"]
                  [clj-pdf "2.1.6"]
                  ]
   :min-lein-version "2.0.0"
@@ -36,5 +37,7 @@
   :profiles {:production {:env {:production true}}}
   :jvm-opts ["-Djava.awt.headless=true"]
   :aliases
-  {"build" ["trampoline" "run" "-m" "anchor.compile-cljs"]}
+  {"build" ["trampoline" "run" "-m" "anchor.compile-cljs"]
+   "build-once" ["trampoline" "run" "-m" "anchor.compile-cljs" "true"]
+   }
 )

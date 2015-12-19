@@ -77,6 +77,7 @@
 (db/dbatom company-sectors "company-sectors") ;company -> sector mix
 (db/dbatom node-order "node-order")
 (db/dbatom node-types "node-types")
+(db/dbatom company-metadata "company-metadata")
 
 (defn nums-string
   "only nums in string"

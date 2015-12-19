@@ -7,8 +7,8 @@
 (def ^:export read-string reader/read-string)
 (def ^:export atom reagent/atom)
 
-(set! js/window.React (js/require "react"))
-(set! js/window.ReactDOM (js/require "react-dom"))
+;(set! js/window.React (js/require "react"))
+;(set! js/window.ReactDOM (js/require "react-dom"))
 
 (enable-console-print!)
 
@@ -18,7 +18,12 @@
   (js/Function. "klass" "k"
                 "
                 var value = document.getElementById(k).value;
-                anchor.params['set_' + k](anchor.core.read_string(value))
+                f = anchor.params['set_' + k]
+                if (typeof f == \"function\") {
+                  f(anchor.core.read_string(value))
+                } else {
+                  console.log('Warning: could not set ' + k)
+                }
                 "))
 
 (def add-script
@@ -36,8 +41,10 @@
    [contents]
    (js/document.getElementById "content")))
 
-(defn page2 [contents]
-  (reagent/render-component contents (js/document.getElementById "content")))
+(defn snippet [contents id]
+  (reagent/render-component
+   [contents]
+   (js/document.getElementById id)))
 
 (defn ^:export p [x]
   (prn @x))

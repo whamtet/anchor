@@ -1,1 +1,2 @@
-browserify -r rc-slider -r react -r react-dom -o bundle.js
+#rm bundle.js
+browserify -r react -r react-dom -r rc-dialog -o bundle.js

@@ -8,6 +8,7 @@
             [ring.middleware.session.cookie :as cookie]
             [ring.adapter.jetty :as jetty]
             [routes.index :as index]
+            [routes.index2 :as index2]
             [routes.sectors :as sectors]
             [routes.data-entry :as data-entry]
             [routes.report :as report]
@@ -22,7 +23,6 @@
 
 (defroutes app
   (GET "/test" [] (index/page ["test"] {}
-;                              ["node_modules/react-slider/react-slider.js"]
                               ))
   (route/resources "/")
   (ANY "*" []
@@ -31,7 +31,7 @@
 (defonce cookie-store (cookie/cookie-store))
 
 (def app2 (routes
-          #'index/routes
+          #'index2/routes
           #'sectors/routes
           #'data-entry/routes
           #'report/routes
