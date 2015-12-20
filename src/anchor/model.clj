@@ -67,17 +67,17 @@
         (merge ~input-map output#)))))
 
 ;;state
-(db/dbatom report-values "report-values") ;company -> reporting period -> variable -> values
-(db/dbatom manual-values "manual-values") ;company -> reporting period -> variable -> values
-(db/dbatom report-manuals "report-manuals") ;company -> reporting period -> variable -> string
-(db/dbatom manual-overrides "manual-overrides") ;company -> reporting period -> variable -> type
-(db/dbatom period-coefficients "period-coefficients") ;company -> coefficients
-(db/dbatom report-metadata "report-metadata") ;company -> reporting period -> {report coefficient year month starting-year starting-month}
-(db/dbatom economic-sectors "economic-sectors") ;sector -> cap-rate
-(db/dbatom company-sectors "company-sectors") ;company -> sector mix
-(db/dbatom node-order "node-order")
-(db/dbatom node-types "node-types")
-(db/dbatom company-metadata "company-metadata")
+;(db/dbatom report-values "report-values") ;company -> reporting period -> variable -> values
+;(db/dbatom manual-values "manual-values") ;company -> reporting period -> variable -> values
+;(db/dbatom report-manuals "report-manuals") ;company -> reporting period -> variable -> string
+;(db/dbatom manual-overrides "manual-overrides") ;company -> reporting period -> variable -> type
+;(db/dbatom period-coefficients "period-coefficients") ;company -> coefficients
+;(db/dbatom report-metadata "report-metadata") ;company -> reporting period -> {report coefficient year month starting-year starting-month}
+;(db/dbatom economic-sectors "economic-sectors") ;sector -> cap-rate
+;(db/dbatom company-sectors "company-sectors") ;company -> sector mix
+;(db/dbatom node-order "node-order")
+;(db/dbatom node-types "node-types")
+;(db/dbatom company-metadata "company-metadata")
 
 (defn nums-string
   "only nums in string"

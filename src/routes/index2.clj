@@ -5,8 +5,8 @@
 (require '[hiccup.page :as hiccup])
 (require 'hiccup.core)
 (require '[anchor.util :as util])
-(require '[anchor.model :as model])
 (require '[routes.index :as index])
+(require '[anchor.db :as db])
 
 (defroutes routes
   #_(GET "/" []
@@ -30,8 +30,8 @@
         (.replace (slurp "resources/public/toast/index.html")
                   "matty"
                   (index/injectoid-s ["index"] {
-                                          "company_metadata" (pr-str @model/company-metadata)
-                                          "report_metadata" (pr-str @model/report-metadata)
-                                          "period_coefficients" (pr-str @model/period-coefficients)
+                                          "company_metadata" (pr-str (db/get-db "company-metadata"))
+                                          "report_metadata" (pr-str (db/get-db "report-metadata"))
+                                          "period_coefficients" (pr-str (db/get-db "period-coefficients"))
                                           }))})
   )

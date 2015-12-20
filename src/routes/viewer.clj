@@ -3,6 +3,7 @@
             [routes.index :as index]
             [anchor.model :as model]
             [anchor.util :as util]
+            [anchor.db :as db]
             ))
 
 (require '[clojure.java.io :as io])
@@ -13,7 +14,7 @@
   (let [
         suffix (second (.split company "\\."))
         ]
-    (filter #(= suffix (second (.split % "\\."))) (keys @model/report-values))))
+    (filter #(= suffix (second (.split % "\\."))) (keys (db/get-db "report-values")))))
 
 (defn clean-text [field]
   (.trim (.toLowerCase field)))
@@ -22,7 +23,7 @@
   (util/recompose-map
    (for [
          company2 (get-matching-companies company)
-         [reporting-period2 fields] (get @model/report-values company2)
+         [reporting-period2 fields] (get (db/get-db "report-values") company2)
          :when (not= [company reporting-period] [company2 reporting-period2])
          [field pages] fields
          [page indices] pages
@@ -37,7 +38,7 @@
        (let [
              s (slurp "resources/public/pdf.js/web/viewer.html")
              input (map str model/manual-input)
-             input (if-let [node-order @model/node-order]
+             input (if-let [node-order (db/get-db "node-order")]
                      (sort-by #(node-order % 0) input)
                      input)
              ]
@@ -48,9 +49,9 @@
                                  "company" (pr-str company)
                                  "reporting_period" (pr-str reporting-period)
                                  "inputs" (pr-str input)
-                                 "report_values" (pr-str (get-in @model/report-values [company reporting-period]))
-                                 "report_metadata" (pr-str (get-in @model/report-metadata [company reporting-period]))
-                                 "report_manuals" (pr-str (get-in @model/report-manuals [company reporting-period]))
+                                 "report_values" (pr-str (get-in (db/get-db "report-values") [company reporting-period]))
+                                 "report_metadata" (pr-str (get-in (db/get-db "report-metadata") [company reporting-period]))
+                                 "report_manuals" (pr-str (get-in (db/get-db "report-manuals") [company reporting-period]))
                                  "report_hints" (pr-str (get-report-hints company reporting-period))
                                  })))))
   (GET "/new-report" [company]
@@ -72,17 +73,13 @@
           (.mkdirs parent-dir)
           (with-open [in (io/input-stream file)]
             (io/copy in outfile))
-          (swap! model/report-metadata assoc-in [company reporting-period] (util/symzip year month starting-year starting-month factor))
-          (model/set-report-metadata)
+          (db/swap-db "report-metadata" assoc-in [company reporting-period] (util/symzip year month starting-year starting-month factor))
           (util/redirect "/report" {:company company :reporting-period reporting-period})))
   (POST "/update-report-values" [company reporting-period report-values report-manuals]
-        (swap! model/report-values assoc-in [company reporting-period] (util/clean report-values))
-        (swap! model/report-manuals assoc-in [company reporting-period] (util/clean report-manuals))
-        (model/set-report-manuals)
-        (model/set-report-values)
+        (db/swap-db "report-values" assoc-in [company reporting-period] (util/clean report-values))
+        (db/swap-db "report-manuals" assoc-in [company reporting-period] (util/clean report-manuals))
         util/ok-response)
   (POST "/update-report-metadata2" [company reporting-period report-metadata]
-        (swap! model/report-metadata assoc-in [company reporting-period] (util/clean report-metadata))
-        (model/set-report-metadata)
+        (db/swap-db "report-metadata" assoc-in [company reporting-period] (util/clean report-metadata))
         util/ok-response)
   )

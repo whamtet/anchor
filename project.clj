@@ -25,11 +25,11 @@
                  [crate "0.2.4"]
                  [jayq "2.5.1"]
                  [cljs-ajax "0.2.6"]
-                 [reagent "0.6.0-SNAPSHOT"; :exclusions [cljsjs/react cljsjs/react-dom]
-                  ]
+                 [reagent "0.5.1"]
 ;                 [frankiesardo/linked "1.2.6"]
                  [clj-pdf "2.1.6"]
                  ]
+  :local-repo "repo"
   :min-lein-version "2.0.0"
   :plugins [[environ/environ.lein "0.2.1"]]
   :hooks [environ.leiningen.hooks]

@@ -5,6 +5,7 @@
 (require '[program-graph.svg-to-edn :as svg-to-edn])
 (require '[routes.index :as index])
 (require '[anchor.model :as model])
+(require '[anchor.db :as db])
 (require '[anchor.update-calculations :as update-calculations])
 (require '[anchor.util :as util])
 
@@ -30,12 +31,11 @@
                                       "manual_input" (pr-str (set (map str model/manual-input)))
                                       "final_output" (pr-str (set (map str model/final-output)))
                                       "values" (pr-str (get (update-calculations/nums [company]) company))
-                                      "manual_values" (pr-str (get @model/manual-values company))
+                                      "manual_values" (pr-str (get (db/get-db "manual-values") company))
                                       "company" (pr-str company)
                                       }))
   (POST "/update-manual-values" [company manual-values]
-        (swap! model/manual-values assoc company
+        (db/swap-db "manual-values" assoc company
                (into {} (map (fn [[k v]] [(name k) v]) manual-values)))
-        (model/set-manual-values)
         (util/pr-response
          (get (update-calculations/nums [company]) company))))

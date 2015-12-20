@@ -24,6 +24,7 @@
   ([] (favicon @new-company-website))
   ([url]
    (let [
+         url (if (.startsWith url "http") url (str "http://" url))
          frags (take 3 (.split url "/"))
          ]
      (if (= 3 (count frags))
@@ -35,9 +36,11 @@
                      "website" @new-company-website
                      "favicon?" favicon?}
         ]
-    (swap! params/company-metadata
-           assoc @yahoo-finance-id new-company)
-    (POST "/update-company-metadata" {:params {:company-metadata @params/company-metadata}})
+    (POST "/add-company" {:params {:name @new-company-name
+                                   :website @new-company-website
+                                   :favicon? favicon?
+                                   :yahoo-finance-id @yahoo-finance-id}
+                          :handler #(reset! params/company-metadata %)})
     (reset! new-company-state :closed)
     (reset! new-company-name "")
     (reset! yahoo-finance-id "")
@@ -74,18 +77,18 @@
   [:div {:class "grid"}
    (map-indexed
     (fn [i [ratio item]]
-      (with-meta
-        (let [
-              [numerator denominator] (.split (name ratio) ":")
-              class (core/format "grid__col grid__col--%s-of-%s" numerator denominator)
-              ]
-          [:div {:class class} item])
-        {:key i}))
+      (let [
+            [numerator denominator] (.split (name ratio) ":")
+            class (core/format "grid__col grid__col--%s-of-%s" numerator denominator)
+            ]
+        (with-meta
+          [:div {:class class} item]
+          {:key i})))
     rows)])
 
 (defn spanify [x]
   (if
-   (or (number? x) (string? x)) [:span x] x))
+    (or (number? x) (string? x)) [:span x] x))
 
 (defn keyed-list [& x]
   (map-indexed #(with-meta (spanify %2) {:key %1}) x))
@@ -132,7 +135,7 @@
                 :value "Cancel"
                 :on-click #(reset! new-company-state :closed)}])]
      (if (= :verifying1 @new-company-state)
-        [[:div {:style {:color "red"}} "Check Errors"]]))
+       [[:div {:style {:color "red"}} "Check Errors"]]))
     :loading-website
     [:div
      [:img {:src "/loading_spinner.gif"}]
@@ -165,37 +168,90 @@
                   }}
     [new-company-div]]])
 
-(defn report-row [yahoo-id reporting-period year month starting-year starting-month]
-  [:div
-   [:a {:href (core/url "/report" {:company yahoo-id :reporting-period reporting-period})
-        :target "_blank"}
-    reporting-period]
-   ])
+(defn delete-report [company reporting-period]
+  (when (js/confirm (core/format "Delete %s %s ?" company reporting-period))
+    (swap! params/report-metadata core/dissoc-in [company reporting-period])
+    (POST "/delete-report" {:params {:company company :reporting-period reporting-period}})))
 
-(defn company-div [yahoo-id name website favicon?]
-  (grid-rows2
-   [:2:2
-    [:a {:href website :target "_blank"}
-     [:h4 (if favicon?
-            [:img {:src (favicon website)}])
-      " " name]]]
-   [:1:5
-    [:a {:href (core/url "/program-graph" {:company yahoo-id})
+(defn report-line [company reporting-period year month starting-year starting-month]
+  (let [
+        time-gap (- (* 2020 12) month (* year 12))
+        time-width (inc (- (+ month (* year 12)) starting-month (* starting-year 12)))
+        scale 4
+        ]
+    [:div
+     [:a {:href (core/url "/report" {:company company :reporting-period reporting-period})
           :target "_blank"}
-      [:img {:src "/GraphvizLogo.png" :style {:max-width 100}}]]]
-   [:4:5
-    (for [[reporting-period {:keys [year month starting-year starting-month]}]
-          (sort-by date-value (get @params/report-metadata yahoo-id))]
-      ^{:key reporting-period}
-      [report-row yahoo-id reporting-period year month starting-year starting-month])]
-   ))
+      reporting-period] " "
+     [:input {:type "button"
+              :value "Delete"
+              :on-click #(delete-report company reporting-period)}]
+     [:div {:style {:width (- (* scale time-width) 2)
+                    :left (* scale time-gap)
+                    :position "relative"
+                    :height 25
+                    :top -24
+                    :border "1px solid black"
+                    :background-color "rgba(123, 137, 148, 0.117647)"
+                    }}]]))
+
+(defn company-div [yahoo-id]
+  (let [
+        {:strs [name website favicon? favicon-link]} (get @params/company-metadata yahoo-id)
+        reports (get @params/report-metadata yahoo-id)
+        num-reports (count reports)
+        ]
+    (grid-rows2
+     [:2:2
+      [:a {:href website :target "_blank"}
+       [:h4
+        (cond
+         favicon-link [:img {:src favicon-link :style {:max-width 30}}]
+         favicon? [:img {:src (favicon website) :style {:max-width 30}}])
+        " " name
+        ]]]
+     [:1:5 ""]
+     [:4:5
+      (if (= 1 num-reports)
+        [:h4 "1 Report"]
+        [:h4 num-reports " Reports"])]
+     [:1:5
+      [:a {:href (core/url "/program-graph" {:company yahoo-id})
+           :target "_blank"}
+       [:img {:src "/GraphvizLogo.png" :style {:max-width 100}}]]]
+     [:4:5
+      (for [[reporting-period {:strs [year month starting-year starting-month]}]
+            (sort-by date-value reports)]
+        ^{:key reporting-period}
+        [report-line yahoo-id reporting-period year month starting-year starting-month])]
+     [:1:5 ""]
+     [:4:5
+      (keyed-list
+       "Report Combination "
+       [:input {:type "text"
+                :default-value (get @params/period-coefficients yahoo-id)
+                :on-blur #(do
+                            (swap! params/period-coefficients assoc yahoo-id (-> % .-target .-value))
+                            (POST "/update-period-coefficients" {:params {:period-coefficients @params/period-coefficients}}))
+                }]
+       " "
+       [:input {
+                :type "button"
+                :value "New Report"
+                :on-click #(core/link-to "/new-report" {:company yahoo-id} true)
+                }]
+       )
+      ]
+     [:2:2 ""]
+     [:2:2 [:hr]]
+     )))
 
 (defn content []
   [:div
    [:link {:rel "stylesheet" :type "text/css" :href "/style.css"}]
-   (for [[yahoo-id {:strs [name website favicon?]}] @params/company-metadata]
+   (for [yahoo-id (mapcat sort (vals (group-by #(-> % (.split ".") second) (keys @params/company-metadata))))];[yahoo-id ] @params/company-metadata]
      ^{:key yahoo-id}
-     [company-div yahoo-id name website favicon?])
+     [company-div yahoo-id])
    [:div {:class "grid"}
     [:div {:class "grid__col grid__col--3-of-5 grid__col--centered center"}
      [:a {:class "butt"

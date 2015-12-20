@@ -1,13 +1,9 @@
 (ns routes.index
   (:require [compojure.core :refer [defroutes GET PUT POST DELETE ANY]]))
 
-;(require '[anchor.html-unit :as html-unit])
-;(require '[anchor.get-images :as get-images])
 (require '[ring.util.response :as response])
 (require '[hiccup.page :as hiccup])
 (require 'hiccup.core)
-(require '[anchor.util :as util])
-(require '[anchor.model :as model])
 
 (defn map-str [f & s] (apply str (interpose "\n" (apply map f s))))
 

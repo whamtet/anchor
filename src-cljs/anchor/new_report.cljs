@@ -3,6 +3,7 @@
    [ajax.core :refer [GET POST]]
    [reagent.core :as reagent :refer [atom]]
    [anchor.core :as core]
+   [anchor.params :as params]
    ))
 
 (def year (atom 2015))

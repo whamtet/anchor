@@ -1,7 +1,7 @@
 (ns routes.report
   (:require [compojure.core :refer [defroutes GET PUT POST DELETE ANY]]
             [routes.index :as index]
-            [anchor.model :as model]
+            [anchor.db :as db]
             [anchor.util :as util]
             [anchor.update-calculations :as update-calculations]
             [pdf.report :as report]
@@ -34,7 +34,7 @@
   (GET "/raw-report" []
        (index/blank-page ["report"]
                          {
-                          "values" (pr-str (update-calculations/nums (keys @model/report-metadata)))
+                          "values" (pr-str (update-calculations/nums (keys (db/get-db "report-metadata"))))
                           "timestamp" (pr-str (util/timestamp))
                           }))
   (GET "/valuation-report" []

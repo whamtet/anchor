@@ -26,14 +26,12 @@
 
 (def data1-5 (memoize data))
 
-(db/dbatom data-backup "yahoo-data")
 (defn data2 [stocks]
   (try
     (let [x (data1-5 stocks)]
-      (swap! data-backup assoc (pr-str stocks) x)
-      (set-data-backup)
+      (db/swap-db "yahoo-data" assoc (pr-str stocks) x)
       x)
-    (catch Exception e (get @data-backup (pr-str stocks)))))
+    (catch Exception e (get (db/get-db "yahoo-data") (pr-str stocks)))))
 
 (defn company-names [companies]
   (zipmap companies (map #(% "name") (data2 companies))))

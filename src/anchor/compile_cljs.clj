@@ -53,7 +53,7 @@
        {:output-to "resources/public/cljs/out.js"
         :warnings false
         :output-dir "resources/public/cljs/out"
-        ;                           :optimizations :advanced
+        :optimizations (if once? :advanced :none)
         :source-map "resources/public/cljs/out.js.map"
         })))
 

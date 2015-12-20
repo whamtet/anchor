@@ -52,10 +52,10 @@
         (wrap-edn/wrap-edn-params {:readers *data-readers*})
         )))
 
-(defn -main [& [port]]
+(defn -main [& args]
   (let [port 5000]
     (jetty/run-jetty (wrap-app #'app2) {:port port :join? false})))
 
 ;; For interactive development:
 ;; (.stop server)
-(defonce server (-main))
+;(defonce server (-main))

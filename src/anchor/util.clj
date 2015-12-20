@@ -89,9 +89,8 @@
 
 (defmacro defupdate [x]
   `(~'POST ~(format "/update-%s" x) [~x]
-         (reset! ~(symbol "model" (str x)) (util/clean ~x))
-         (~(symbol "model" (str "set-" x)))
-         util/ok-response))
+           (db/set-db ~(str x) (util/clean ~x))
+           util/ok-response))
 
 (defn value-map [f m]
   (zipmap (keys m) (map f (vals m))))

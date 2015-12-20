@@ -3,6 +3,7 @@
 (require '[anchor.model :as model])
 (require '[anchor.util :as util])
 (require '[anchor.yahoo :as yahoo])
+(require '[anchor.db :as db])
 
 (defn parse-value [value]
   (Double/parseDouble
@@ -17,18 +18,18 @@
 (defn manual-overrides [company reporting-period factor]
   (let [
         factor (* factor
-                  ({"1" 1 "k" 1000 "M" 1000000} (get-in @model/report-metadata [company reporting-period "factor"])))
+                  ({"1" 1 "k" 1000 "M" 1000000} (get-in (db/get-db "report-metadata") [company reporting-period "factor"])))
         ]
     (util/value-map #(* factor (parse-values %))
-                    (get-in @model/report-manuals [company reporting-period]))))
+                    (get-in (db/get-db "report-manuals") [company reporting-period]))))
 
 (defn get-values-at [company reporting-period factor]
   (let [
         factor (* factor
-                  ({"1" 1 "k" 1000 "M" 1000000} (get-in @model/report-metadata [company reporting-period "factor"])))
+                  ({"1" 1 "k" 1000 "M" 1000000} (get-in (db/get-db "report-metadata") [company reporting-period "factor"])))
         ]
     (into {}
-          (for [[field pages] (get-in @model/report-values [company reporting-period])]
+          (for [[field pages] (get-in (db/get-db "report-values") [company reporting-period])]
             [field
              (reduce +
                      (for [[page items] pages
@@ -44,8 +45,8 @@
 
 (defn manual-values [company]
   (let [
-        factors (map read-string (remove empty? (.split (get @model/period-coefficients company "") " ")))
-        sorted-reporting-periods (sort-by date-value (keys (get @model/report-metadata company)))
+        factors (map read-string (remove empty? (.split (get (db/get-db "period-coefficients") company "") " ")))
+        sorted-reporting-periods (sort-by date-value (keys (get (db/get-db "report-metadata") company)))
 
         values (map #(get-values-at company %1 %2) sorted-reporting-periods factors)
         values2 (map #(manual-overrides company %1 %2) sorted-reporting-periods factors)
@@ -55,16 +56,16 @@
     (into {}
           (for [[k v] reduced-values]
             [k
-             (if (= "Balance Sheet" (get @model/node-types k))
+             (if (= "Balance Sheet" (get (db/get-db "node-types") k))
                (some #(get % k) values)
                v)]))))
 
 (defn cap-rate [company]
   (let [
-        proportion (get @model/company-sectors company)
+        proportion (get (db/get-db "company-sectors") company)
         ]
     (/
-     (reduce + (map (fn [[sector proportion]] (* proportion (get @model/economic-sectors sector))) proportion))
+     (reduce + (map (fn [[sector proportion]] (* proportion (get (db/get-db "economic-sectors") sector))) proportion))
      (reduce + (vals proportion))
      100
      )))
@@ -79,11 +80,11 @@
         ]
     (zipmap companies
             (map (fn [company manual cap-rate yahoo-data]
-                   (merge default-inputs manual yahoo-data {"cap-rate" cap-rate} (get @model/manual-values company)))
+                   (merge default-inputs manual yahoo-data {"cap-rate" cap-rate} (get (db/get-db "manual-values") company)))
                  companies manual-values cap-rates yahoo-data))))
 
 (defn nums
-  ([] (nums (keys @model/report-metadata)))
+  ([] (nums (keys (db/get-db "report-metadata"))))
   ([companies]
    (into {}
          (map (fn [[company input]]
