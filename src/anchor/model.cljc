@@ -1,6 +1,7 @@
-(ns anchor.model)
-(require '[anchor.db :as db])
-(require '[clojure.walk :as walk])
+(ns anchor.model
+  (:require [clojure.walk :as walk]
+            clojure.set
+            ))
 
 ;;Here we define our financial model
 ;;anchor will parse the model to generate the appropriate user interfaces

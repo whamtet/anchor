@@ -1,13 +1,18 @@
 (ns routes.program-graph
-  (:require [compojure.core :refer [defroutes GET PUT POST DELETE ANY]]))
-
-(require '[rhizome.viz :as viz])
-(require '[program-graph.svg-to-edn :as svg-to-edn])
-(require '[routes.index :as index])
-(require '[anchor.model :as model])
-(require '[anchor.db :as db])
-(require '[anchor.update-calculations :as update-calculations])
-(require '[anchor.util :as util])
+  (:require
+   #?(:clj [compojure.core :refer [defroutes GET PUT POST DELETE ANY]])
+   #?(:clj [rhizome.viz :as viz])
+   #?(:cljs [graph.viz :as viz])
+   [graph.svg-to-edn :as svg-to-edn]
+   [routes.index :as index]
+   [anchor.model :as model]
+   [anchor.db :as db]
+   [anchor.update-calculations :as update-calculations]
+   [anchor.util :as util]
+   )
+  #?(:cljs
+     (:require-macros
+     [dogfort.middleware.routes-macros :refer [defroutes GET POST ANY]])))
 
 (def node-descriptor (fn [s]
                        {:label

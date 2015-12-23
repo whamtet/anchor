@@ -1,16 +1,27 @@
-(ns anchor.update-calculations)
-
-(require '[anchor.model :as model])
-(require '[anchor.util :as util])
-(require '[anchor.yahoo :as yahoo])
-(require '[anchor.db :as db])
+(ns anchor.update-calculations
+  (:require
+   [anchor.model :as model]
+   [anchor.util :as util]
+   [anchor.yahoo :as yahoo]
+   [anchor.db :as db]
+   [clojure.string :as string]
+   #?(:cljs
+      [redlobster.promise :as redlobster])
+   )
+  #?(:cljs
+     (:require-macros
+      [redlobster.macros :refer [promise let-realised]]))
+  )
 
 (defn parse-value [value]
-  (Double/parseDouble
-   (reduce
-    (fn [s to-remove]
-      (.replace s to-remove ""))
-    value ["," "(" ")"])))
+  (#?(:clj
+      Double/parseDouble
+      :cljs
+      js/Number)
+     (reduce
+      (fn [s to-remove]
+        (string/replace s to-remove ""))
+      value ["," "(" ")"])))
 
 (defn parse-values [values]
   (reduce + (map parse-value (remove empty? (.split values " ")))))
@@ -72,16 +83,33 @@
 
 (def default-inputs {"new-project-return" 0 "new-project-expenditure" 0})
 
-(defn inputs [companies]
-  (let [
-        manual-values (map manual-values companies)
-        cap-rates (map cap-rate companies)
-        yahoo-data (yahoo/data2 companies)
-        ]
-    (zipmap companies
-            (map (fn [company manual cap-rate yahoo-data]
-                   (merge default-inputs manual yahoo-data {"cap-rate" cap-rate} (get (db/get-db "manual-values") company)))
-                 companies manual-values cap-rates yahoo-data))))
+#?(:clj
+   (defn inputs [companies]
+     (let [
+           manual-values (map manual-values companies)
+           cap-rates (map cap-rate companies)
+           yahoo-data (yahoo/data2 companies)
+           manual-values2 (db/get-db "manual-values")
+           ]
+       (zipmap companies
+               (map (fn [company manual cap-rate yahoo-data]
+                      (merge default-inputs manual yahoo-data {"cap-rate" cap-rate} (get manual-values2 company)))
+                    companies manual-values cap-rates yahoo-data))))
+   :cljs
+   (defn inputs [companies]
+     (let [
+           manual-values (map manual-values companies)
+           cap-rates (map cap-rate companies)
+           manual-values2 (db/get-db "manual-values")
+           ]
+       (let-realised
+        [
+         yahoo-data (yahoo/data2 companies)
+         ]
+        (zipmap companies
+                (map (fn [company manual cap-rate yahoo-data]
+                       (merge default-inputs manual yahoo-data {"cap-rate" cap-rate} (get manual-values2 company)))
+                     companies manual-values cap-rates @yahoo-data))))))
 
 (defn nums
   ([] (nums (keys (db/get-db "report-metadata"))))

@@ -1,11 +1,20 @@
 (ns routes.report
-  (:require [compojure.core :refer [defroutes GET PUT POST DELETE ANY]]
+  (:require #?(:clj [compojure.core :refer [defroutes GET PUT POST DELETE ANY]])
             [routes.index :as index]
             [anchor.db :as db]
             [anchor.util :as util]
             [anchor.update-calculations :as update-calculations]
-            [pdf.report :as report]
-            ))
+;            [pdf.report :as report]
+            )
+  #?(:cljs
+     (:require-macros
+     [dogfort.middleware.routes-macros :refer [defroutes GET POST ANY]])))
+
+(defn binary-slurp [f]
+  (with-open [in (io/input-stream f)
+              out (java.io.ByteArrayOutputStream.)]
+    (io/copy in out)
+    (.toByteArray out)))
 
 (require '[clojure.java.io :as io])
 (require '[ring.util.response :as response])
@@ -24,7 +33,7 @@
         _ (println (shell/sh "wkhtmltopdf" "--orientation" "Landscape" "--debug-javascript" "--no-stop-slow-scripts"
                              "-L" "6mm" "-R" "6mm" "-T" "6mm" "-B" "6mm"
                              "http://localhost:5000/raw-report" f))
-        bytes (util/binary-slurp f)
+        bytes (binary-slurp f)
         ]
     (-> f File. .delete)
     bytes
@@ -37,7 +46,7 @@
                           "values" (pr-str (update-calculations/nums (keys (db/get-db "report-metadata"))))
                           "timestamp" (pr-str (util/timestamp))
                           }))
-  (GET "/valuation-report" []
+  #_(GET "/valuation-report" []
        (let [
   ;           bytes (get-binary)
              bytes (report/pdf)

@@ -1,4 +1,4 @@
-(ns program-graph.svg-to-edn)
+(ns graph.svg-to-edn)
 
 ;(def lines (.split (slurp "test.html") "\n"))
 

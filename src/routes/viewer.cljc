@@ -1,10 +1,13 @@
 (ns routes.viewer
-  (:require [compojure.core :refer [defroutes GET PUT POST DELETE ANY]]
+  (:require #?(:clj [compojure.core :refer [defroutes GET PUT POST DELETE ANY]])
             [routes.index :as index]
             [anchor.model :as model]
             [anchor.util :as util]
             [anchor.db :as db]
-            ))
+            )
+  #?(:cljs
+     (:require-macros
+     [dogfort.middleware.routes-macros :refer [defroutes GET POST ANY]])))
 
 (require '[clojure.java.io :as io])
 (require '[ring.util.response :as response])

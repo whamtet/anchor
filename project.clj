@@ -16,9 +16,7 @@
                  [rhizome "0.2.5"] ;graphing
                  [hiccup "1.0.5"]
 
-                 [clojure-csv/clojure-csv "2.0.1"]
                  [com.joptimizer/joptimizer "3.4.0"]
-                 #_[net.sourceforge.htmlunit/htmlunit "2.19" :exclusions [commons-logging org.apache.commons/commons-lang3]]
 
                  ;;cljs
                  [org.clojure/clojurescript "1.7.28"]
@@ -26,10 +24,14 @@
                  [jayq "2.5.1"]
                  [cljs-ajax "0.2.6"]
                  [reagent "0.5.1"]
-;                 [frankiesardo/linked "1.2.6"]
                  [clj-pdf "2.1.6"]
+
+                 ;;hiccups
+                 [org.clojars.whamtet/hiccups "0.4.0-SNAPSHOT"]
+
+                 ;;dogfort
+                 [dogfort "0.2.0-SNAPSHOT"]
                  ]
-  :local-repo "repo"
   :min-lein-version "2.0.0"
   :plugins [[environ/environ.lein "0.2.1"]]
   :hooks [environ.leiningen.hooks]
@@ -39,5 +41,6 @@
   :aliases
   {"build" ["trampoline" "run" "-m" "anchor.compile-cljs"]
    "build-once" ["trampoline" "run" "-m" "anchor.compile-cljs" "true"]
+   "build-node" ["trampoline" "run" "-m" "anchor.compile-node" "anchor.web"]
    }
 )

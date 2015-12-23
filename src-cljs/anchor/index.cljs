@@ -6,8 +6,6 @@
    [anchor.params :as params]
    [ajax.core :refer [GET POST]]
    )
-  (:require-macros
-   [anchor.macros :as macros])
   )
 
 (defn date-value [[s]]

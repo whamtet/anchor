@@ -1,9 +1,12 @@
 (ns routes.bberg
-  (:require [compojure.core :refer [defroutes GET PUT POST DELETE ANY]]
+  (:require #?(:clj [compojure.core :refer [defroutes GET PUT POST DELETE ANY]])
             [routes.index :as index]
             [anchor.util :as util]
             [anchor.model :as model]
-            ))
+            )
+  #?(:cljs
+     (:require-macros
+       [dogfort.middleware.routes-macros :refer [defroutes GET POST ANY]])))
 
 (def headers '[NORMALIZED_INCOME
                EARN_FOR_COMMON
@@ -19,5 +22,4 @@
                               "headers" (pr-str headers)
                               "lines" (slurp "resources/bberg.txt")
                               "fields" (pr-str (map str model/manual-input))
-                              }))
-  )
+                              })))

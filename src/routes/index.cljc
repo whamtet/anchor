@@ -1,9 +1,19 @@
 (ns routes.index
-  (:require [compojure.core :refer [defroutes GET PUT POST DELETE ANY]]))
+  (:require
+   #?(:clj [hiccup.page :as hiccup])
+   #?(:clj hiccup.core)
+   #?(:cljs hiccups.runtime)
+   )
+  #?(:cljs (:require-macros [hiccups.core :as hiccup]))
+  )
 
-(require '[ring.util.response :as response])
-(require '[hiccup.page :as hiccup])
-(require 'hiccup.core)
+(defn response
+  "Returns a skeletal Ring response with the given body, status of 200, and no
+  headers."
+  [body]
+  {:status  200
+   :headers {}
+   :body    body})
 
 (defn map-str [f & s] (apply str (interpose "\n" (apply map f s))))
 
@@ -38,7 +48,8 @@
 
 (defn injectoid-s
   [classes kvs & [scripts]]
-  (hiccup.core/html (injectoid classes kvs scripts)))
+  (#?(:clj hiccup.core/html :cljs hiccup/xhtml-tag)
+     (injectoid classes kvs scripts)))
 
 (def anchor
   [:div
@@ -55,7 +66,7 @@
 (defn page
   "page with aforementioned snippet"
   [classes kvs & [scripts]]
-  (response/response
+  (response
    (hiccup/html5
     [:head
      [:meta {:http-equiv "X-UA-Compatible" :content "IE=edge"}]
@@ -70,7 +81,7 @@
 (defn blank-page
   "page with aforementioned snippet"
   [classes kvs & [scripts]]
-  (response/response
+  (response
    (hiccup/html5
     [:head
      [:meta {:http-equiv "X-UA-Compatible" :content "IE=edge"}]

@@ -1,7 +1,7 @@
-FROM clojure
-COPY . /usr/src/app
+FROM heroku/nodejs
+COPY out /usr/src/app/out
+COPY main.js /usr/src/app/main.js
 WORKDIR /usr/src/app
-RUN lein build-once
 RUN apt-get update && apt-get install graphviz -y
 
-CMD lein run -m anchor.web
+CMD node main.js

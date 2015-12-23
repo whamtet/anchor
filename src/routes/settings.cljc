@@ -1,10 +1,13 @@
 (ns routes.settings
-  (:require [compojure.core :refer [defroutes GET PUT POST DELETE ANY]]
+  (:require #?(:clj [compojure.core :refer [defroutes GET PUT POST DELETE ANY]])
             [routes.index :as index]
             [anchor.db :as db]
             [anchor.model :as model]
             [anchor.util :as util]
-            ))
+            )
+  #?(:cljs
+     (:require-macros
+     [dogfort.middleware.routes-macros :refer [defroutes GET POST ANY]])))
 
 (defroutes routes
   (GET "/settings" []
