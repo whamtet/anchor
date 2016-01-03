@@ -1,14 +1,12 @@
 (ns routes.report
-  (:require #?(:clj [compojure.core :refer [defroutes GET PUT POST DELETE ANY]])
+  (:require [compojure.core :refer [defroutes GET PUT POST DELETE ANY]]
             [routes.index :as index]
             [anchor.db :as db]
             [anchor.util :as util]
             [anchor.update-calculations :as update-calculations]
 ;            [pdf.report :as report]
             )
-  #?(:cljs
-     (:require-macros
-     [dogfort.middleware.routes-macros :refer [defroutes GET POST ANY]])))
+  )
 
 (defn binary-slurp [f]
   (with-open [in (io/input-stream f)

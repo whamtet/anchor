@@ -11,6 +11,37 @@
      (:require-macros
       [anchor.util :as util])))
 
+;;wish to memoize promises
+
+#?(:cljs
+   (defn memoize-promise
+     [f]
+     (let [
+           mem (atom {})
+           ]
+       (fn [& args]
+         (if-let [result (get @mem args)]
+           (promise (realise result))
+           (let-realised [result (apply f args)]
+                         (swap! mem assoc args @result)
+                         @result))))))
+
+;;wish to define let-realised proxy
+#?(:clj
+   (do
+     (import clojure.lang.IDeref)
+     (deftype SimpleRef [val]
+       IDeref
+       (deref [this] val))
+     (defn rebind [bindings]
+       (vec (mapcat
+        (fn [[k v]]
+          [k `(SimpleRef. ~v)])
+        (partition 2 bindings))))
+     (defmacro let-realised [bindings & forms]
+       `(let ~(rebind bindings)
+          ~@forms))))
+
 #?(:cljs
    (cljs.nodejs/enable-util-print!))
 

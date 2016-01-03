@@ -1,6 +1,11 @@
-(ns graph.svg-to-edn)
+(ns graph.svg-to-edn
+  (:require [clojure.string :as string]))
 
 ;(def lines (.split (slurp "test.html") "\n"))
+
+(defn replace [a b c]
+  ;(println "replacing" a b c)
+  (string/replace a b c))
 
 (defn parse-kv [line]
   (into {}
@@ -8,7 +13,7 @@
                (let [
                      [k v] (.split s "=")
                      ]
-                 [(keyword k) (.replace v "\"" "")]))
+                 [(keyword k) (replace v "\"" "")]))
              (re-seq #"\S+?=\".+?\"" line))))
 
 (defn nested-conj [ms i x]
@@ -20,17 +25,17 @@
   (let [
         ]
     (loop [
-           todo (.split s "\n")
+           todo (.split (.trim s) "\n")
            i 0
            done nil
            ]
       (if-let [line (first todo)]
         (let [
               line-start (re-find #"\S+" line)
-              tag (keyword (.replace line-start "<" ""))
+              tag (keyword (replace line-start "<" ""))
               new-element (cond
                            (#{"<path" "<polygon" "<ellipse" "<g"} line-start) [tag (parse-kv line)]
-                           (= "<text" line-start) [:text (parse-kv line) (-> (re-find #">.*?<" line) (.replace "<" "") (.replace ">" ""))]
+                           (= "<text" line-start) [:text (parse-kv line) (-> (re-find #">.*?<" line) (replace "<" "") (string/replace ">" ""))]
                            (= "<svg" line-start) [:svg (parse-kv (str line (second todo)))])
               ]
           (cond

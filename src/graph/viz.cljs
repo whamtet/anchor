@@ -25,4 +25,4 @@
     .-stdin
     (stream/write-stream s))))
 
-(def graph->svg (comp dot/graph->dot dot->svg))
+(def graph->svg (comp dot->svg dot/graph->dot))

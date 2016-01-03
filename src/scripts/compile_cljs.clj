@@ -1,10 +1,18 @@
-(ns anchor.compile-cljs)
+(ns
+  ^{:doc "Compile Browser Clojurescript.
+    We wish to pass parameters from the server to our clojurescript namespaces.
+    We thus parse all the files in routes/ to find GET endpoints.
+    These endpoints are compiled into an additional (ns anchor.params) namespace.
+    "}
+  scripts.compile-cljs)
 (require 'cljs.build.api)
 
-(defn slurp-route [route]
-  (read-string (format "(list %s)" (slurp route))))
+(defn- slurp-route [route]
+  (read-string {:read-cond :allow} (format "(list %s)" (slurp route))))
 
-(defn extract-form [form]
+(defn- extract-form
+  "Returns a list of [endpoint parameters] pairs"
+  [form]
   (if (or (list? form) (map? form))
     (cond
      (= 'defroutes (first form))
@@ -16,18 +24,23 @@
      (map? form) (some extract-form (vals form))
      :default (some extract-form form))))
 
-(defn extract-route [route]
+(defn- extract-route [route]
   (extract-form (slurp-route route)))
 
-(defn spit-changes [f s]
+(defn- spit-changes [f s]
   (let [
         old (try (slurp f) (catch Exception e))
         ]
     (if (not= s old) (spit f s))))
 
-(defn compile-cljs [once?]
+(defn- compile-cljs
+  "Compile browser Clojurescript, first spitting params list to (ns anchor.params) if necessary"
+  [once?]
   (let [
-        routes (filter #(.endsWith (.getName %) ".clj") (file-seq (java.io.File. "src/routes")))
+        routes (filter #(or
+                         (.endsWith (.getName %) ".clj")
+                         (.endsWith (.getName %) ".cljc"))
+                       (file-seq (java.io.File. "src/routes")))
         forms (mapcat extract-route routes)
         params (format "
                        (ns anchor.params

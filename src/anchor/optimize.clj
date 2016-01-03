@@ -1,4 +1,6 @@
-(ns anchor.optimize)
+(ns anchor.optimize
+  ^{:doc "Use JOptimize to allocate stocks"}
+  )
 
 (require '[anchor.update-calculations :as update-calculations])
 (require '[anchor.util :as util])
@@ -7,16 +9,13 @@
 (import com.joptimizer.optimizers.JOptimizer)
 (import com.joptimizer.optimizers.OptimizationRequest)
 
-(defn company->country [s]
+(defn- company->country [s]
   ({"AX" "Australia"
     "SI" "Singapore"
     "HK" "Hong Kong"
     } (second (.split s "\\."))))
 
-(defn d-array [x]
-  (into-array (map #(double-array %) x)))
-
-(defn slope [risk-weighting {:strs [fair-value-discount leverage]}]
+(defn- slope [risk-weighting {:strs [fair-value-discount leverage]}]
   (+ fair-value-discount (* leverage risk-weighting)))
 
 (def countries ["Australia" "Singapore" "Hong Kong"])
@@ -28,7 +27,9 @@
 (defn map-f [fs val]
   (map #(% val) fs))
 
-(defn optimize [country-mins country-maxs stock-max risk-weighting]
+(defn optimize
+  "Allocate stocks by maximizing a linear multivariate function subject to constraints."
+  [country-mins country-maxs stock-max risk-weighting]
   (let [
         [companies values] (map-f [keys vals] (update-calculations/nums))
         company->country (zipmap companies (map company->country companies))

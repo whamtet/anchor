@@ -1,7 +1,13 @@
 (ns anchor.model
+  ^{:doc "Defines core financial model"}
   (:require [clojure.walk :as walk]
             clojure.set
-            ))
+            #?(:cljs [cljs.js :refer [eval empty-state]])
+            redlobster.promise
+            )
+  #?(:cljs
+     (:require-macros [redlobster.macros :refer [promise]]))
+  )
 
 ;;Here we define our financial model
 ;;anchor will parse the model to generate the appropriate user interfaces
@@ -23,7 +29,7 @@
 ;;which variables are calculated automatically
 (def automatic-input '#{cap-rate share-price shares-outstanding})
 
-(defn node? [node]
+(defn- node? [node]
   (and
    (not= node '-)
    (re-find #"^[a-z\-]+$" (str node))))
@@ -50,7 +56,9 @@
 
 (def final-output (apply clojure.set/difference output (vals dependencies)))
 
-(defn add-output [company input-map]
+(defn add-output
+  "compute model output"
+  [company input-map]
   (doseq [arg input]
     (assert (input-map (str arg)) (str company " " arg)))
   (let [
@@ -58,14 +66,18 @@
         model (mapcat (fn [[a b]]
                         (if-not (defined-vars a) [a b]))
                       (partition 2 model))
+        code `(let [
+                    {:strs ~(vec defined-vars)} ~input-map
+                    ~@model
+                    output# (zipmap ~(mapv str output) ~(vec output))
+                    ]
+                (merge ~input-map output#))
         ]
-    (eval
-     `(let [
-            {:strs ~(vec defined-vars)} ~input-map
-            ~@model
-            output# (zipmap ~(mapv str output) ~(vec output))
-            ]
-        (merge ~input-map output#)))))
+    #?(:clj (eval code)
+       :cljs (promise
+              (eval (empty-state) code {:eval (fn [{:keys [source]}] (js/eval source))} #(realise %)))
+
+     )))
 
 ;;state
 ;(db/dbatom report-values "report-values") ;company -> reporting period -> variable -> values
@@ -79,26 +91,3 @@
 ;(db/dbatom node-order "node-order")
 ;(db/dbatom node-types "node-types")
 ;(db/dbatom company-metadata "company-metadata")
-
-(defn nums-string
-  "only nums in string"
-  [s]
-  (apply str (re-seq #"[0-9\.-]+" s)))
-
-(defn clean-up [m]
-  (if-let [value (get m "value")]
-    (assoc m "value" (nums-string value))
-    m))
-
-(defn clean-up-map [m]
-  (walk/postwalk clean-up m))
-
-(defn clean-empty [m]
-  (if (map? m)
-    (let [
-          m (into {}
-                  (for [[k v] m :let [v (clean-empty v)] :when (and k v)]
-                    [k v]))
-          ]
-      (if-not (empty? m) m))
-    m))

@@ -31,7 +31,7 @@
          (try
            (Double/parseDoubles)
            (catch Throwable t
-             (.replace s "\"" "")))))))
+             (string/replace s "\"" "")))))))
 
 (defn parse-line [line]
   (map
@@ -53,7 +53,6 @@
                            csv (parse-csv (.trim @s))
                            m (util/map-by second csv)
                            ]
-                       (prn m)
                        (map #(let [[name symbol share-price shares-outstanding] (m %)]
                                (symzip name share-price shares-outstanding))
                             stocks)))))
@@ -71,14 +70,6 @@
                  (symzip name share-price shares-outstanding))
               stocks)))))
 
-(def data1-5 (memoize data))
+;;haven't decided how to memoize
 
-(defn data2 [stocks]
-  (try
-    (let [x (data1-5 stocks)]
-      (db/swap-db "yahoo-data" assoc (pr-str stocks) x)
-      x)
-    (catch Exception e (get (db/get-db "yahoo-data") (pr-str stocks)))))
-
-(defn company-names [companies]
-  (zipmap companies (map #(% "name") (data2 companies))))
+(def data2 (#?(:clj memoize :cljs util/memoize-promise) data))

@@ -3,8 +3,10 @@
    #?(:clj [compojure.core :refer [defroutes GET PUT POST DELETE ANY]])
    [routes.index :as index]
    [anchor.db :as db]
+   [anchor.util :as util]
+   [anchor.optimize :as optimize]
    #?(:cljs [redlobster.promise :as promise])
-   #?(:cljs redlobster.stream)
+   #?(:cljs [redlobster.io :as io])
    )
   #?(:cljs
      (:require-macros
@@ -18,7 +20,7 @@
 (defroutes routes
   (GET "/" []
        (let-realised
-        [s (stream/read-stream (stream/read-file "resources/public/toast/index.html"))]
+        [s (io/slurp "resources/public/toast/index.html")]
         {:status 200
          :headers {"Content-Type" "text/html; charset=utf-8"}
          :body
@@ -29,4 +31,12 @@
                                                  "report_metadata" (pr-str (db/get-db "report-metadata"))
                                                  "period_coefficients" (pr-str (db/get-db "period-coefficients"))
                                                  }))}))
+  (GET "/test" [] (index/page ["test"] {}))
+  (GET "/dump-db" []
+        (db/dump-db)
+        (util/response "dumped"))
+  (GET "/test2" []
+       (let-realised [s (optimize/optimize)]
+         (util/response @s)))
+
   )

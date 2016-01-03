@@ -1,4 +1,5 @@
 (ns anchor.get-icon
+  ^{:doc "Get icon from html <link> metadata"}
   (:require
    [anchor.util :as util]
    #?(:cljs [redlobster.promise :as promise])
@@ -10,12 +11,16 @@
 
 ;(defonce s (slurp "http://www.linkreit.com/EN/Pages/default.aspx"))
 
-(defn join-paths [paths1 [starter & rest :as paths2]]
+(defn- join-paths [paths1 [starter & rest :as paths2]]
   (if (= ".." starter)
     (recur (butlast paths1) rest)
     (apply str (interpose "/" (concat paths1 paths2)))))
 
-(defn absolutize [url path]
+(defn absolutize
+  "Transform base url and path into absolute url.
+  If path is already absolute do nothing.
+  "
+  [url path]
   (let [
         url (.trim url)
         path (.trim path)
@@ -37,7 +42,9 @@
            ]
        (join-paths paths1 (.split path "/"))))))
 
-(defn get-link [url s]
+(defn- get-link
+  "find <link> tag"
+  [url s]
   (let [
         find-group #(second (re-find %1 %2))
         rel (find-group #"rel=\"(.+?)\"" s)
@@ -47,16 +54,20 @@
       (get-images/absolutize url href))))
 
 #?(:clj
-  (defn get-icon [url]
-  (let [
-        s (slurp url)
-        links (re-seq #"<link .+?>" s)
-        icon-url (some #(get-link url %) links)
-        ]
-    icon-url)))
+   (defn get-icon
+     "Get icon from html <link> metadata"
+     [url]
+     (let [
+           s (slurp url)
+           links (re-seq #"<link .+?>" s)
+           icon-url (some #(get-link url %) links)
+           ]
+       icon-url)))
 
 #?(:cljs
-   (defn get-icon [url]
+   (defn get-icon
+     "Get icon from html <link> metadata"
+     [url]
      (let-realised [s (io/slurp-http url)]
                    (let [
                          links (re-seq #"<link .+?>" @s)

@@ -1,17 +1,21 @@
-(ns anchor.db)
+(ns
+  ^{:doc "Connect to MongoDB.
+    First try the port provided by docker and then localhost.
+    The public methods are at the bottom."}
+  anchor.db)
 
 (require '[monger.core :as mg])
 (require '[monger.collection :as mc])
 (require '[clojure.walk :as walk])
 
-(defn escape [[k v]]
+(defn- escape [[k v]]
   [(.replace k "." "_DOT_") v])
-(defn unescape [[k v]]
+(defn- unescape [[k v]]
   [(.replace (name k) "_DOT_" ".") v])
 
-(defn map-escape [m]
+(defn- map-escape [m]
   (walk/postwalk #(if (map? %) (into {} (map escape %)) %) m))
-(defn map-unescape [m]
+(defn- map-unescape [m]
   (walk/postwalk #(if (map? %) (into {} (map unescape %)) %) m))
 
 (def mongo-addr (System/getenv "ANCHOR_MONGO_PORT_27017_TCP_ADDR"))
@@ -31,9 +35,17 @@
        (reset! ~sym (map-unescape (:data (mc/find-map-by-id db ~s ~s)))))
      ))
 
-(defn set-db [s data]
+;; Public Methods
+
+(defn set-db
+  "Set collection s to contents data"
+  [s data]
   (mc/update db s {:_id s} {"$set" {:data (map-escape data)}} {:upsert true}))
-(defn get-db [s]
+(defn get-db
+  "Get collection s"
+  [s]
   (map-unescape (:data (mc/find-map-by-id db s s))))
-(defn swap-db [s f & args]
+(defn swap-db
+  "Update collection s to (apply f old-val args)"
+  [s f & args]
   (set-db s (apply f (get-db s) args)))

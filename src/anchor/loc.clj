@@ -1,4 +1,6 @@
-(ns anchor.loc)
+(ns
+  ^{:doc "Lines of code"}
+  anchor.loc)
 
 (import java.io.File)
 

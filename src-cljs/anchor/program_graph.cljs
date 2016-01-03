@@ -35,7 +35,7 @@
           field (core/replace-all text1 " " "-")
           value (get @params/values field)
           value (cond
-                 (not (number? value)) value
+                 (not (number? value)) (str value)
                  (zero? value) 0
                  (<= (js/Math.log10 (js/Math.abs value)) 2)
                  (if (integer? value)
@@ -91,7 +91,7 @@
 (defn content []
   (let [
         svg (walk/postwalk clean-vector @params/graph)
-        svg (assoc-in svg [1 :viewBox] "450 0.00 3000 1100")
+        svg (assoc-in svg [1 :viewBox] "300 0.00 3000 1100")
         ]
     [:div
      [dialog]

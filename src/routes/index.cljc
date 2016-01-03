@@ -3,6 +3,7 @@
    #?(:clj [hiccup.page :as hiccup])
    #?(:clj hiccup.core)
    #?(:cljs hiccups.runtime)
+   [anchor.util :as util]
    )
   #?(:cljs (:require-macros [hiccups.core :as hiccup]))
   )
@@ -22,6 +23,8 @@
    (map (fn [[k v]] [:input {:type "hidden" :id k :value v}]) kvs)
    [:script (format "%s anchor.%s.main();"
                     (map-str #(format "anchor.core.bind_variable('%s', '%s');" class %) (keys kvs)) class)]))
+
+#?(:cljs (def format util/format))
 
 (defn injectoid
   "a snippet to pump in clojurescript"
@@ -48,7 +51,7 @@
 
 (defn injectoid-s
   [classes kvs & [scripts]]
-  (#?(:clj hiccup.core/html :cljs hiccup/xhtml-tag)
+  (#?(:clj hiccup.core/html :cljs hiccup/html)
      (injectoid classes kvs scripts)))
 
 (def anchor

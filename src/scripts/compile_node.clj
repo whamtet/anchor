@@ -1,4 +1,6 @@
-(ns anchor.compile-node)
+(ns
+  ^{:doc "Compile Browser Clojurescript for Node Target"}
+  scripts.compile-node)
 
 (require 'cljs.build.api)
 

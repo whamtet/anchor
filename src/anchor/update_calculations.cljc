@@ -6,11 +6,13 @@
    [anchor.db :as db]
    [clojure.string :as string]
    #?(:cljs
+      [cljs.reader :refer [read-string]])
+   #?(:cljs
       [redlobster.promise :as redlobster])
    )
   #?(:cljs
      (:require-macros
-      [redlobster.macros :refer [promise let-realised]]))
+      [redlobster.macros :refer [let-coll-realised let-realised]]))
   )
 
 (defn parse-value [value]
@@ -51,14 +53,14 @@
                        (if negative? (- value) value)))]))))
 
 (defn date-value [s]
-  (let [[year month] (map #(Integer/parseInt %) (.split s " "))]
-    (- 0 year (/ month 12))))
+  (let [x #?(:clj #(Integer/parseInt %) :cljs #(js/Number %))]
+    (let [[year month] (map x (.split s " "))]
+      (- 0 year (/ month 12)))))
 
 (defn manual-values [company]
   (let [
         factors (map read-string (remove empty? (.split (get (db/get-db "period-coefficients") company "") " ")))
         sorted-reporting-periods (sort-by date-value (keys (get (db/get-db "report-metadata") company)))
-
         values (map #(get-values-at company %1 %2) sorted-reporting-periods factors)
         values2 (map #(manual-overrides company %1 %2) sorted-reporting-periods factors)
         values (map #(merge-with + %1 %2) values values2)
@@ -83,37 +85,31 @@
 
 (def default-inputs {"new-project-return" 0 "new-project-expenditure" 0})
 
-#?(:clj
-   (defn inputs [companies]
-     (let [
-           manual-values (map manual-values companies)
-           cap-rates (map cap-rate companies)
-           yahoo-data (yahoo/data2 companies)
-           manual-values2 (db/get-db "manual-values")
-           ]
+(defn inputs [companies]
+  (let [
+        manual-values (map manual-values companies)
+        cap-rates (map cap-rate companies)
+        manual-values2 (db/get-db "manual-values")
+        ]
+    (#?(:cljs let-realised :clj util/let-realised)
+       [
+        yahoo-data (yahoo/data2 companies)
+        ]
        (zipmap companies
                (map (fn [company manual cap-rate yahoo-data]
                       (merge default-inputs manual yahoo-data {"cap-rate" cap-rate} (get manual-values2 company)))
-                    companies manual-values cap-rates yahoo-data))))
-   :cljs
-   (defn inputs [companies]
-     (let [
-           manual-values (map manual-values companies)
-           cap-rates (map cap-rate companies)
-           manual-values2 (db/get-db "manual-values")
-           ]
-       (let-realised
-        [
-         yahoo-data (yahoo/data2 companies)
-         ]
-        (zipmap companies
-                (map (fn [company manual cap-rate yahoo-data]
-                       (merge default-inputs manual yahoo-data {"cap-rate" cap-rate} (get manual-values2 company)))
-                     companies manual-values cap-rates @yahoo-data))))))
+                    companies manual-values cap-rates @yahoo-data)))))
 
 (defn nums
   ([] (nums (keys (db/get-db "report-metadata"))))
   ([companies]
-   (into {}
-         (map (fn [[company input]]
-                [company (model/add-output company input)]) (inputs companies)))))
+   #?(:clj
+      (into {}
+            (map (fn [[company input]]
+                   [company (model/add-output company input)]) (inputs companies)))
+      :cljs
+      (let-realised
+       [inputs (inputs companies)]
+       (let-coll-realised [output (map (fn [[company input]]
+                                                (model/add-output company input)) @inputs)]
+                          (zipmap companies output))))))
