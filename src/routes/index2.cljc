@@ -18,7 +18,7 @@
 
 
 (defroutes routes
-  (GET "/" []
+  (GET "/" {:keys [session]}
        (let-realised
         [s (io/slurp "resources/public/toast/index.html")]
         {:status 200
@@ -27,15 +27,22 @@
          (.replace @s
                    "matty"
                    (index/injectoid-s ["index"] {
+                                                 "session" (pr-str session)
                                                  "company_metadata" (pr-str (db/get-db "company-metadata"))
                                                  "report_metadata" (pr-str (db/get-db "report-metadata"))
                                                  "period_coefficients" (pr-str (db/get-db "period-coefficients"))
                                                  }))}))
+  (POST "/append-endpoint" {session :session {endpoint :endpoint} :params}
+        {:status 200
+         :headers {}
+         :body "ok"
+         :session (conj (if (set? session) session #{}) endpoint)})
   (GET "/test" [] (index/page ["test"] {}))
   (GET "/dump-db" []
         (db/dump-db)
         (util/response "dumped"))
-  (ANY "/test2" [p]
-       (prn p)
-       (pr-str p))
+  (ANY "/test2" req
+       {:status 200
+        :headers {}
+        :body (pr-str req)})
   )

@@ -1,10 +1,11 @@
 (ns anchor.index
   (:require
    [reagent.core :as reagent :refer [atom]]
-   [reagent.impl.template :as temp]
    [anchor.core :as core]
    [anchor.params :as params]
    [ajax.core :refer [GET POST]]
+   [anchor.slideshow :as slideshow]
+   [anchor.popups :as popups]
    )
   )
 
@@ -145,9 +146,8 @@
     [:div]
     ))
 
-(defn new-company-dialog []
+(defn dialog [width margin child]
   [:div {:style {
-                 :visibility (if (= :closed @new-company-state) "hidden" "visible")
                  :position "fixed"
                  :left 0
                  :top 0
@@ -157,14 +157,16 @@
                  :z-index 1000
                  }}
    [:div {:style {
-                  :width 500
-                  :margin "100px auto"
+                  :width width
+                  :margin (core/format "%spx auto" margin)
                   :background-color "white"
                   :border "1px solid black"
                   :padding 15
                   :text-align "center"
                   }}
-    [new-company-div]]])
+    [child]]])
+
+
 
 (defn delete-report [company reporting-period]
   (when (js/confirm (core/format "Delete %s %s ?" company reporting-period))
@@ -184,6 +186,7 @@
      [:input {:type "button"
               :value "Delete"
               :on-click #(delete-report company reporting-period)}]
+     (if (= "ABP.AX" company) [popups/popup 1])
      [:div {:style {:width (- (* scale time-width) 2)
                     :left (* scale time-gap)
                     :position "relative"
@@ -216,15 +219,24 @@
         [:h4 "1 Report"]
         [:h4 num-reports " Reports"])]
      [:1:5
-      [:a {:href (core/url "/program-graph" {:company yahoo-id})
-           :target "_blank" :class "network-link"
-           :title "View Company Model"
-           }]]
+      (list
+       ^{:key "a"}
+       [:a {:href (core/url "/program-graph" {:company yahoo-id})
+            :target "_blank" :class "network-link"
+            :title "View Company Model"
+            }]
+       (if (= "ABP.AX" yahoo-id)
+         ^{:key "b"}
+         [popups/popup 0]))
+      ]
      [:4:5
-      (for [[reporting-period {:strs [year month starting-year starting-month]}]
-            (sort-by date-value reports)]
-        ^{:key reporting-period}
-        [report-line yahoo-id reporting-period year month starting-year starting-month])]
+      (concat
+       (for [[reporting-period {:strs [year month starting-year starting-month]}]
+             (sort-by date-value reports)]
+         ^{:key reporting-period}
+         [report-line yahoo-id reporting-period year month starting-year starting-month])
+       [^{:key "fizz"} [:a {:href "/bberg" :target "_blank"} "Bloomberg Data"]])
+      ]
      [:1:5 ""]
      [:4:5
       (keyed-list
@@ -249,12 +261,7 @@
 
 (defn content []
   [:div
-   [:style "
-    .network-link {
-
-}"]
-   [:link {:rel "stylesheet" :type "text/css" :href "/style.css"}]
-   (for [yahoo-id (mapcat sort (vals (group-by #(-> % (.split ".") second) (keys @params/company-metadata))))];[yahoo-id ] @params/company-metadata]
+   (for [yahoo-id (mapcat sort (vals (group-by #(-> % (.split ".") second) (keys @params/company-metadata))))]
      ^{:key yahoo-id}
      [company-div yahoo-id])
    [:div {:class "grid"}
@@ -263,10 +270,16 @@
           :href "javascript:void(0)"
           :on-click #(reset! new-company-state :entering1)
           } "Add Company"]]]
-   [new-company-dialog]
+   (if (not= :closed @new-company-state)
+     [dialog 500 100 new-company-div])
+   (if (and @slideshow/slide (not (get @params/session "/")))
+     [dialog 800 50 slideshow/slide-frame])
    ])
 
 (defn main []
-  ;  (js/$ #(core/snippet new-company-dialog "tiantian"))
+  ;  (js/$ #(core/snippet dialog "tiantian"))
   (core/page content)
-  )
+  (core/add-script "/basic-jquery-slider/js/bjqs-1.3.min.js")
+  (core/add-css "/basic-jquery-slider/bjqs.css")
+  (core/add-css "/style.css")
+  (js/key "escape" #(reset! slideshow/slide nil)))

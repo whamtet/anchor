@@ -20,9 +20,9 @@
                 var value = document.getElementById(k).value;
                 f = anchor.params['set_' + k]
                 if (typeof f == \"function\") {
-                  f(anchor.core.read_string(value))
+                f(anchor.core.read_string(value))
                 } else {
-                  console.log('Warning: could not set ' + k)
+                console.log('Warning: could not set ' + k)
                 }
                 "))
 
@@ -32,6 +32,15 @@
                 s.type = \"text/javascript\";
                 s.src=src
                 document.head.appendChild(s)"))
+
+(def add-css
+  (js/Function. "url"
+                "var head = document.head, link = document.createElement('link')
+                link.type = 'text/css'
+                link.rel = 'stylesheet'
+                link.href = url
+
+                head.appendChild(link)"))
 
 (defn value-map [f m]
   (zipmap (keys m) (map f (vals m))))

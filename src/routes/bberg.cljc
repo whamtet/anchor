@@ -3,10 +3,14 @@
             [routes.index :as index]
             [anchor.util :as util]
             [anchor.model :as model]
+            #?(:cljs [redlobster.promise :as promise])
+            #?(:cljs [redlobster.io :refer [slurp]])
             )
   #?(:cljs
      (:require-macros
-       [dogfort.middleware.routes-macros :refer [defroutes GET POST ANY]])))
+      [dogfort.middleware.routes-macros :refer [defroutes GET POST ANY]]
+      [redlobster.macros :refer [let-realised]]
+      )))
 
 (def headers '[NORMALIZED_INCOME
                EARN_FOR_COMMON
@@ -16,10 +20,16 @@
                TOT_LIAB_AND_EQY
                CF_NET_CHNG_CASH])
 
+#?(:clj
+   (def lines (slurp "resources/bberg.txt"))
+   :cljs
+   (let-realised [s (slurp "resources/bberg.txt")]
+                 (def lines @s)))
+
 (defroutes routes
   (GET "/bberg" []
        (index/page ["bberg"] {
                               "headers" (pr-str headers)
-                              "lines" (slurp "resources/bberg.txt")
+                              "lines" lines
                               "fields" (pr-str (map str model/manual-input))
                               })))

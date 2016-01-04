@@ -70,7 +70,8 @@
          :info {:title (str "Anchor Financial Report " (util/datestamp))}
          }
    (footer-page
-    [:style {:translate [50 50]}
+    [:style {:translate [50 100]}
+     [:text {:font-size 18} (str "Daily Report " (util/datestamp)) 0 -30]
     (table (table2 values))])])
 
 (defn pdf []
