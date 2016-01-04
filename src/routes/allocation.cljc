@@ -21,13 +21,10 @@
                                    }))
 
   (POST "/allocate" [country-mins country-maxs stock-max risk-weighting]
-        (println "ppleaze")
         (let [
               country-mins (util/clean country-mins)
               country-maxs (util/clean country-maxs)
               ]
-          (prn "got here" country-mins country-maxs stock-max risk-weighting)
           (#?(:clj util/let-realised :cljs let-realised)
              [allocation (optimize/optimize country-mins country-maxs stock-max risk-weighting)]
-             (prn "allocation" @allocation)
              (util/pr-response @allocation)))))

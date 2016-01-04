@@ -5,5 +5,16 @@
             [ajax.core :refer [GET POST]]
             ))
 
-(POST "/mirror" {:params {:p "hi"}
-                 :handler prn})
+(defn content []
+  [:div
+   [:form {:method "POST" :action "/test2"
+           :enc-type "multipart/form-data"
+           }
+    [:input {:type "file"
+             :name "file-name"}]
+    [:input {:type "submit"}]]])
+
+(defn main []
+  (core/page content))
+
+(POST "/test2" {:params {:p 3}})

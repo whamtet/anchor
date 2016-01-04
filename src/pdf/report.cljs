@@ -1,12 +1,15 @@
 (ns pdf.report
   (:require [anchor.util :as util]
             [anchor.update-calculations :as update-calculations]
-            [cljs-pdfkit.core :as cljs-pdfkit]))
+            [cljs-pdfkit.core :as cljs-pdfkit]
+            redlobster.promise
+            )
+  (:require-macros [redlobster.macros :refer [let-realised]]))
 
 (defn footer-page [body]
   [:page
    body
-   [:text 0 400 (util/timestamp)]])
+   [:text (util/timestamp) 60 520]])
 
 ;;need to transpose that table for analysis
 (defn safe-nth [s n]
@@ -15,16 +18,17 @@
 
 (defn transpose [table]
   (let [
-        num-cols (apply max (map count rows))
+        num-cols (apply max (map count table))
         ]
     (for [col-num (range num-cols)]
       (map #(safe-nth % col-num) table))))
 
-(defn table [& rows]
+(defn table [rows]
   (let [
         cols (transpose rows)
-        col-lengths (map #(inc (count %)) cols)
-        col-x (cons 0 (util/cumul col-lengths))
+        col-width #(max 10 (apply max (map count %)))
+        col-widths (map col-width cols)
+        col-x (cons 0 (util/cumul col-widths))
         ]
     (map-indexed
      (fn [i row]
@@ -32,7 +36,7 @@
         (fn [col-x col]
           [:text
            {:font (if (= 0 i) "Helvetica-Bold" "Helvetica")}
-           col col-x (* 10 i)])
+           col (* 8 col-x) (* 14 i)])
         col-x row))
      rows)))
 
@@ -47,7 +51,7 @@
        (apply str)))
 
 (defn disp-percent [x]
-  (->> x (* 100) (format "%.2f")))
+  (.toFixed (* x 100) 2))
 
 (defn table2 [values]
   (cons
@@ -61,6 +65,14 @@
       (disp-num net-income)
       (disp-num market-cap)])))
 
+(defn doc [values]
+  [:pdf {:layout "landscape"
+         :info {:title (str "Anchor Financial Report " (util/datestamp))}
+         }
+   (footer-page
+    [:style {:translate [50 50]}
+    (table (table2 values))])])
 
 (defn pdf []
-  (cljs-pdfkit/pdf (table2 (update-calculations/nums))))
+  (let-realised [nums (update-calculations/nums)]
+    (cljs-pdfkit/pdf (doc @nums))))

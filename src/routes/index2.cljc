@@ -35,8 +35,7 @@
   (GET "/dump-db" []
         (db/dump-db)
         (util/response "dumped"))
-  (GET "/test2" []
-       (let-realised [s (optimize/optimize)]
-         (util/response @s)))
-
+  (ANY "/test2" [p]
+       (prn p)
+       (pr-str p))
   )

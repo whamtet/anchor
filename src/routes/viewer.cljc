@@ -4,14 +4,48 @@
             [anchor.model :as model]
             [anchor.util :as util]
             [anchor.db :as db]
+            #?(:cljs [redlobster.stream :as stream])
+            #?(:cljs [redlobster.http :as http])
+            #?(:cljs [redlobster.promise :as promise])
+            #?(:cljs [redlobster.io :as io :refer [slurp]])
             )
   #?(:cljs
      (:require-macros
-     [dogfort.middleware.routes-macros :refer [defroutes GET POST ANY]])))
+      [dogfort.middleware.routes-macros :refer [defroutes GET POST ANY]]
+      [redlobster.macros :refer [let-realised promise]]
+      )))
 
-(require '[clojure.java.io :as io])
-(require '[ring.util.response :as response])
-(import java.io.File)
+#?(:clj
+   (do
+     (require '[clojure.java.io :as io])
+     (import java.io.File)
+     (def report-html (slurp "resources/public/pdf.js/web/viewer.html"))
+     )
+   :cljs
+   (do
+     (def fs (js/require "fs"))
+
+     (defn path-seq [s]
+       (reduce
+        (fn [v subpath]
+          (conj v (str (peek v) "/" subpath)))
+        [(first s)] (rest s)))
+
+     (defn mkdirs [path]
+       (if (string? path)
+         (recur (.split path "/"))
+         (doseq [subpath (path-seq path)]
+           (try
+             (.mkdirSync fs subpath)
+             (catch :default e)))))
+
+     (defn pipe [a b cb]
+       (.on a "end" cb)
+       (.pipe a b))
+
+     (let-realised [s (slurp "resources/public/pdf.js/web/viewer.html")]
+                   (def report-html @s))
+     ))
 
 (defn get-matching-companies [company]
   (let [
@@ -39,24 +73,23 @@
 (defroutes routes
   (GET "/report" [company reporting-period]
        (let [
-             s (slurp "resources/public/pdf.js/web/viewer.html")
              input (map str model/manual-input)
              input (if-let [node-order (db/get-db "node-order")]
                      (sort-by #(node-order % 0) input)
                      input)
              ]
          (util/response
-           (.replace s "matty"
-             (index/injectoid-s ["viewer"]
-                                {
-                                 "company" (pr-str company)
-                                 "reporting_period" (pr-str reporting-period)
-                                 "inputs" (pr-str input)
-                                 "report_values" (pr-str (get-in (db/get-db "report-values") [company reporting-period]))
-                                 "report_metadata" (pr-str (get-in (db/get-db "report-metadata") [company reporting-period]))
-                                 "report_manuals" (pr-str (get-in (db/get-db "report-manuals") [company reporting-period]))
-                                 "report_hints" (pr-str (get-report-hints company reporting-period))
-                                 })))))
+          (.replace report-html "matty"
+                    (index/injectoid-s ["viewer"]
+                                       {
+                                        "company" (pr-str company)
+                                        "reporting_period" (pr-str reporting-period)
+                                        "inputs" (pr-str input)
+                                        "report_values" (pr-str (get-in (db/get-db "report-values") [company reporting-period]))
+                                        "report_metadata" (pr-str (get-in (db/get-db "report-metadata") [company reporting-period]))
+                                        "report_manuals" (pr-str (get-in (db/get-db "report-manuals") [company reporting-period]))
+                                        "report_hints" (pr-str (get-report-hints company reporting-period))
+                                        })))))
   (GET "/new-report" [company]
        (index/page ["new_report"] {
                                    "company" (pr-str company)
@@ -66,18 +99,35 @@
               [year month starting-year starting-month]
               (map #(Integer/parseInt %)
                    [year month starting-year starting-month])
-              file (if (empty? url)
-                     (:tempfile file)
-                     url)
-              outfile (File. (format "resources/public/reports/%s/%s %s.pdf" company year month))
-              parent-dir (File. (format "resources/public/reports/%s" company))
+
               reporting-period (str year " " month)
+              outfile (format "resources/public/reports/%s/%s %s.pdf" company year month)
+              parent-dir (format "resources/public/reports/%s" company)
               ]
-          (.mkdirs parent-dir)
-          (with-open [in (io/input-stream file)]
-            (io/copy in outfile))
           (db/swap-db "report-metadata" assoc-in [company reporting-period] (util/symzip year month starting-year starting-month factor))
-          (util/redirect "/report" {:company company :reporting-period reporting-period})))
+          ;;copy shit
+          #?(:clj
+             (let [
+                   file (if (empty? url)
+                          (:tempfile file)
+                          url)
+                   ]
+               (.mkdirs (File. parent-dir))
+               (with-open [in (io/input-stream file)]
+                 (io/copy in (File. outfile)))
+               (util/redirect "/report" {:company company :reporting-period reporting-period}))
+             :cljs
+             (do
+               (mkdirs parent-dir)
+               (if (some-> url .trim not-empty)
+                 (let-realised
+                  [res (http/request url)]
+                  (promise
+                   (pipe @res (stream/write-file outfile)
+                         #(realise (util/redirect "/report" {:company company :reporting-period reporting-period})))))
+                 (let-realised
+                  [_ (io/spit outfile (:data file))]
+                  (util/redirect "/report" {:company company :reporting-period reporting-period})))))))
   (POST "/update-report-values" [company reporting-period report-values report-manuals]
         (db/swap-db "report-values" assoc-in [company reporting-period] (util/clean report-values))
         (db/swap-db "report-manuals" assoc-in [company reporting-period] (util/clean report-manuals))

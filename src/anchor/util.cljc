@@ -2,6 +2,8 @@
   (:require [clojure.walk :as walk]
             #?(:cljs [redlobster.stream :as stream])
             #?(:cljs [redlobster.promise :as promise])
+            #?(:cljs [redlobster.io :refer [spit slurp]])
+            #?(:cljs [cljs.reader :refer [read-string]])
             #?(:cljs cljs.nodejs)
             )
   #?(:cljs
@@ -11,6 +13,10 @@
      (:require-macros
       [anchor.util :as util])))
 
+(defn cumul [s]
+  (reduce (fn [v i]
+            (conj v (+ (peek v) i))) [(first s)] (rest s)))
+
 ;;wish to memoize promises
 
 #?(:cljs
@@ -19,11 +25,14 @@
      (let [
            mem (atom {})
            ]
+       (let-realised [s (slurp "resources/yahoo.edn")]
+                     (reset! mem (read-string @s)))
        (fn [& args]
          (if-let [result (get @mem args)]
            (promise (realise result))
            (let-realised [result (apply f args)]
                          (swap! mem assoc args @result)
+                         (spit "resources/yahoo.edn" (pr-str @mem))
                          @result))))))
 
 ;;wish to define let-realised proxy

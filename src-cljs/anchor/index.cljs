@@ -193,6 +193,8 @@
                     :background-color "rgba(123, 137, 148, 0.117647)"
                     }}]]))
 
+(def network-hover-company (atom nil))
+
 (defn company-div [yahoo-id]
   (let [
         {:strs [name website favicon? favicon-link]} (get @params/company-metadata yahoo-id)
@@ -215,8 +217,9 @@
         [:h4 num-reports " Reports"])]
      [:1:5
       [:a {:href (core/url "/program-graph" {:company yahoo-id})
-           :target "_blank"}
-       [:img {:src "/GraphvizLogo.png" :style {:max-width 100}}]]]
+           :target "_blank" :class "network-link"
+           :title "View Company Model"
+           }]]
      [:4:5
       (for [[reporting-period {:strs [year month starting-year starting-month]}]
             (sort-by date-value reports)]
@@ -246,6 +249,10 @@
 
 (defn content []
   [:div
+   [:style "
+    .network-link {
+
+}"]
    [:link {:rel "stylesheet" :type "text/css" :href "/style.css"}]
    (for [yahoo-id (mapcat sort (vals (group-by #(-> % (.split ".") second) (keys @params/company-metadata))))];[yahoo-id ] @params/company-metadata]
      ^{:key yahoo-id}

@@ -9,10 +9,12 @@
    [routes.index2 :as index2]
    [routes.program-graph :as program-graph]
    [routes.report :as report]
+   [routes.sectors :as sectors]
+   [routes.settings :as settings]
+   [routes.viewer :as viewer]
    dogfort.middleware.routes
    [dogfort.middleware.defaults :as defaults]
    [dogfort.http :refer [run-http]]
-   [dogfort.middleware.edn :as edn]
    anchor.optimize
             )
   (:require-macros
@@ -25,6 +27,9 @@
   index2/routes
   program-graph/routes
   report/routes
+  sectors/routes
+  settings/routes
+  viewer/routes
   dogfort.middleware.routes/not-found
   )
 

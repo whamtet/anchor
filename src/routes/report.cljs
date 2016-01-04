@@ -15,13 +15,14 @@
 
 (defroutes routes
   (GET "/valuation-report" []
-       {:status 200
-        :headers {"Content-Type" "application/pdf"
-                  "Content-Disposition"
-                  (util/format
-                   "Content-Disposition: attachment; filename=\"Anchor Report %s\"" (util/datestamp))
-                  }
-        :body (report/pdf)
-        :end-stream? true
-        }
-       ))
+       (let-realised [report (report/pdf)]
+                     {:status 200
+                      :headers {"Content-Type" "application/pdf"
+                                "Content-Disposition"
+                                (util/format
+                                 "Content-Disposition: attachment; filename=\"Anchor Report %s\"" (util/datestamp))
+                                }
+                      :body @report
+                      :end-stream? true
+                      }
+                     )))

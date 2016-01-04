@@ -10,4 +10,5 @@
    "src"
    {:main (symbol main)
     :output-to "main.js"
+    :verbose false
     :target :nodejs}))

@@ -113,7 +113,7 @@
                        lp (glp.Problem.)
                        mpl (glp.Mathprog.)
 
-                       temp-file (str (gensym))
+                       temp-file (str "temp/" (gensym))
 
                        ]
                    (let-realised
