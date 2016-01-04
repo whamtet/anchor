@@ -38,7 +38,7 @@
                  (def clj-graph (svg-to-edn/parse @im))))
 
 (defroutes routes
-  (GET "/program-graph" [company reporting-period]
+  (GET "/program-graph" [company reporting-period :as req]
        (#?(:clj util/let-realised :cljs let-realised) [nums (update-calculations/nums [company])]
           (index/page ["program_graph"] {
                                          "graph" (pr-str clj-graph)
@@ -48,6 +48,7 @@
                                          "values" (pr-str (get @nums company))
                                          "manual_values" (pr-str (get (db/get-db "manual-values") company))
                                          "company" (pr-str company)
+                                         "session" (pr-str (:session req))
                                          })))
   (POST "/update-manual-values" [company manual-values]
         (db/swap-db "manual-values" assoc company

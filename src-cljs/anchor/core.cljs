@@ -4,6 +4,26 @@
             [cljs.reader :as reader]
             ))
 
+(defn dialog [width margin child]
+  [:div {:style {
+                 :position "fixed"
+                 :left 0
+                 :top 0
+                 :width "100%"
+                 :height "100%"
+                 :background-color "rgba(236, 237, 237, 0.8)"
+                 :z-index 1000
+                 }}
+   [:div {:style {
+                  :width width
+                  :margin (format "%spx auto" margin)
+                  :background-color "white"
+                  :border "1px solid black"
+                  :padding 15
+                  :text-align "center"
+                  }}
+    [child]]])
+
 (def ^:export read-string reader/read-string)
 (def ^:export atom reagent/atom)
 

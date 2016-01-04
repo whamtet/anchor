@@ -13,7 +13,6 @@
   (let [[year month] (map int (.split s " "))]
     (- 0 year (/ month 12))))
 
-;(def rc-dialog (js/require "rc-dialog"))
 (def new-company-state (atom :closed))
 (def new-company-name (atom ""))
 (def yahoo-finance-id (atom ""))
@@ -146,26 +145,6 @@
     [:div]
     ))
 
-(defn dialog [width margin child]
-  [:div {:style {
-                 :position "fixed"
-                 :left 0
-                 :top 0
-                 :width "100%"
-                 :height "100%"
-                 :background-color "rgba(236, 237, 237, 0.8)"
-                 :z-index 1000
-                 }}
-   [:div {:style {
-                  :width width
-                  :margin (core/format "%spx auto" margin)
-                  :background-color "white"
-                  :border "1px solid black"
-                  :padding 15
-                  :text-align "center"
-                  }}
-    [child]]])
-
 
 
 (defn delete-report [company reporting-period]
@@ -213,8 +192,9 @@
          favicon? [:img {:src (favicon website) :style {:max-width 30}}])
         " " name
         ]]]
-     [:1:5 ""]
-     [:4:5
+     [:2:2 ""]
+     ;[:1:5 ""]
+     #_[:4:5
       (if (= 1 num-reports)
         [:h4 "1 Report"]
         [:h4 num-reports " Reports"])]
@@ -271,9 +251,9 @@
           :on-click #(reset! new-company-state :entering1)
           } "Add Company"]]]
    (if (not= :closed @new-company-state)
-     [dialog 500 100 new-company-div])
+     [core/dialog 500 100 new-company-div])
    (if (and @slideshow/slide (not (get @params/session "/")))
-     [dialog 800 50 slideshow/slide-frame])
+     [core/dialog 800 50 slideshow/slide-frame])
    ])
 
 (defn main []

@@ -10,6 +10,9 @@
 (def all-popups [
                  [150 -100 60 -85 -10 "/" "View Financial Model"]
                  [140 -55 50 -40 -10 "/" "Data Entry"]
+                 [380 -20 505 35 230 "/program-graph" "Click Nodes to Edit Values"]
+                 [200 -50 150 0 -20 "/report" "Select Input Field and Click Values on the Report.  Green is Positive, Red Negative"]
+                 [160 -50 70 -30 -5 "/report" "Autofill Guesses Fields Based on Previous Reports."]
                  ])
 
 (def pathname js/window.location.pathname)
@@ -29,7 +32,7 @@
           [x y arrow-x arrow-y rotation path text] popup
           shadow "10px 10px 5px #888888"
           ]
-      (when (= i 0)
+      #_(when (= i 0)
         (POST "/append-endpoint" {:params {:endpoint pathname}}))
       [:div
        [:div {:style {:margin-left arrow-x
@@ -38,6 +41,7 @@
                       :height 40
                       :position "absolute"
                       :transform (core/format "scale(0.7, 0.7) rotate(%sdeg)" rotation)
+                      :z-index 999
                       }}
         [:div {:style {:width 0 :height 0 :border-top "20px solid transparent" :border-bottom "20px solid transparent"
                        :border-right "20px solid #30261b"

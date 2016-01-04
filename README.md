@@ -4,13 +4,39 @@
 
 Value Investor Portfolio Management Suite
 
-## Usage
+[Demo](http://www.anchor-demo.net)
 
-To start a local web server for development you can either eval the
-commented out forms at the bottom of `web.clj` from your editor or
+[User Guide](http://whamtet.github.io/anchor)
+
+## Building
+
+Anchor can be run on both the JVM and Node!  First compile the browser clojurescript
+
+    $ lein build-once
+
+or for a watch script
+
+    $ lein build
+
+To start on the JVM you can either eval the commented out forms
+at the bottom of `anchor.web.clj` from your editor or
 launch from the command line:
 
     $ lein run -m anchor.web
+
+To run with node you must first install the npm (node package manager) dependencies.
+
+    $ lein npm install
+
+next build the server side clojurescript
+
+    $ lein build-node
+
+finally launch the server
+
+    $ node main.js
+
+For more information please see the [User Guide](http://whamtet.github.io/anchor).
 
 ## License
 

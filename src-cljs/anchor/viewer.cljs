@@ -6,6 +6,7 @@
    [crate.core :as crate]
    [clojure.data :as data]
    [anchor.params :as params]
+   [anchor.popups :as popups]
    ))
 
 (def field (atom nil))
@@ -260,6 +261,8 @@
       [:input {:type "button"
                :value "Autofill"
                :on-click #(reset! menu-status :import)}]
+      [popups/popup 0]
+      [popups/popup 1]
       ])
    [:br]
    [:table
