@@ -1,35 +1,29 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en-us">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta charset="UTF-8">
     <title>Anchor by whamtet</title>
-
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/github-light.css">
-    <meta name="viewport" content="width=device-width">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
   </head>
   <body>
-    <div class="wrapper">
-      <header>
-        <h1>Anchor</h1>
-        <p>Value Investor Portfolio Management Suite</p>
+    <section class="page-header">
+      <h1 class="project-name">Anchor</h1>
+      <h2 class="project-tagline">Value Investor Portfolio Management Suite</h2>
+      <a href="https://github.com/whamtet/anchor" class="btn">View on GitHub</a>
+      <a href="https://github.com/whamtet/anchor/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/whamtet/anchor/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
 
-        <p class="view"><a href="https://github.com/whamtet/anchor">View the Project on GitHub <small>whamtet/anchor</small></a></p>
-
-
-        <ul>
-          <li><a href="https://github.com/whamtet/anchor/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/whamtet/anchor/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/whamtet/anchor">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <h3>
+    <section class="main-content">
+      <h3>
 <a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h3>
+
+<h4>
+<a id="define-model" class="anchor" href="#define-model" aria-hidden="true"><span class="octicon octicon-link"></span></a>Define Model</h4>
 
 <p>First define your financial model in <code>anchor.model.cljc</code>.  Anchor uses this model to determine input and output variables and structure its financial calculations.  The default model is defined</p>
 
@@ -47,14 +41,64 @@
     leverage (<span class="pl-en">/</span> total-liabilities net-asset-value)
     ])</pre></div>
 
-<p>Calculations on the right hand side are assigned to the left side.  Variables without explicit assignments such as <code>net-income</code> and <code>cap-rate</code> are determined to be input variables (see below).</p>
-      </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/whamtet">whamtet</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+<p>Calculations on the right hand side are assigned to the left side.  Variables without explicit assignments such as <code>net-income</code> and <code>cap-rate</code> are determined to be input variables for entry below.</p>
+
+<h4>
+<a id="define-investment-universe" class="anchor" href="#define-investment-universe" aria-hidden="true"><span class="octicon octicon-link"></span></a>Define Investment Universe</h4>
+
+<p>Include all stocks that you may consider holding for this step.  On the main page click</p>
+
+<p><img src="https://raw.githubusercontent.com/whamtet/anchor/master/resources/public/tour/new-company.png" alt=""></p>
+
+<p>and enter company metadata.</p>
+
+<h4>
+<a id="data-sources" class="anchor" href="#data-sources" aria-hidden="true"><span class="octicon octicon-link"></span></a>Data Sources</h4>
+
+<p>Anchor can incorporate data from providers such as Bloomberg or directly from company filings.  All PDF documents are supported.  To include a new document click <code>New Report</code> on the main page under the company concerned.  Once the document has been submitted the data entry screen will load.</p>
+
+<p><img src="https://raw.githubusercontent.com/whamtet/anchor/master/resources/public/tour/2.png" alt=""></p>
+
+<p>To input data select the input fields on the left hand side of the screen and click fields on the main document.  Clicking twice inverts the sign of the selected field (red instead of green).  You may also type values manually in the text box.  The input variables needed are determined automatically from the model in step one.</p>
+
+<p>Anchor can use artificial intelligence (AI) to pre-guess which fields must be selected.  It does this by tracking patterns in the data from other reports.  As more data is added, the guessing improves.  When entering a new report click <code>Autofill</code>.</p>
+
+<p><img src="https://raw.githubusercontent.com/whamtet/anchor/master/resources/public/tour/autofill.png" alt=""></p>
+
+<p>Anchor will scan from the starting to ending page inclusive to pre-guess fields.  <code>Import Column</code> tells Anchor which column to use counting from the right.  In many countries the latest values are reported in the second to right column so <code>Import Column</code> should be set to 2.</p>
+
+<h4>
+<a id="combine-data-sources" class="anchor" href="#combine-data-sources" aria-hidden="true"><span class="octicon octicon-link"></span></a>Combine Data Sources</h4>
+
+<p><img src="https://raw.githubusercontent.com/whamtet/anchor/master/resources/public/tour/report-combination.png" alt=""></p>
+
+<p>The <code>Report Combination</code> box on the main page determines how to combine company filing reports to produce a twelve month estimate of earnings.  If the report entered is for twelve months this value is simply <code>1</code>.  To combine four quarterly reports use <code>1 1 1 1</code>.  Another combination is <code>1 1 -1</code>, used when the latest report is for six months only.  In this case we wish to add the six month report to the second half earnings in the preceding annual report.  Since this is not reported directly we must take the difference between the annual earnings and the six month earnings one year ago (1 -1).</p>
+
+<h4>
+<a id="adjust-stock-valuation" class="anchor" href="#adjust-stock-valuation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Adjust Stock Valuation</h4>
+
+<p><img src="https://raw.githubusercontent.com/whamtet/anchor/master/resources/public/tour/1.png" alt=""></p>
+
+<p>Click the network icon on the main page to bring up the stock valuation page.  This shows the financial model as a directed network graph.  Each node is a value in the model, and the arrows show dependencies.  For example <code>net-asset-value = gross-asset-value - total-liabilities</code>, so the <code>net-asset-value</code> node has arrows pointing to <code>gross-asset-value</code> and <code>total-liabilities</code>.  Displaying the model in this way makes it easy to see which values have the largest effect on total company valuation.  Nodes may be also overridden to account for recent changes in company performance.</p>
+
+<h4>
+<a id="allocate-investment-portfolio" class="anchor" href="#allocate-investment-portfolio" aria-hidden="true"><span class="octicon octicon-link"></span></a>Allocate Investment Portfolio</h4>
+
+<p>Anchor can recommend an investment portfolio once all companies in the investment universe have been valued.  It does this by maximising the sum of <code>discount to fair value</code> across all stocks subject to stock and country level constraints.  There is also a leverage adjustment to match the investor's appetite for risk.  Allocating a portfolio helps the user verify their valuation by checking whether the recommended holdings match their expectations.</p>
+
+<h4>
+<a id="generate-daily-report" class="anchor" href="#generate-daily-report" aria-hidden="true"><span class="octicon octicon-link"></span></a>Generate Daily Report</h4>
+
+<p>Anchor can print daily valuation summaries.  Click <code>Valuation Report</code> on the main screen to generate a PDF.</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/whamtet/anchor">Anchor</a> is maintained by <a href="https://github.com/whamtet">whamtet</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
       </footer>
-    </div>
-    <script src="javascripts/scale.fix.js"></script>
-    
+
+    </section>
+
+  
   </body>
 </html>
