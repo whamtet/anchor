@@ -51,4 +51,7 @@
    "build-once" ["trampoline" "run" "-m" "scripts.compile-cljs" "true"]
    "build-node" ["trampoline" "run" "-m" "scripts.compile-node" "anchor.web"]
    }
+  :npm {:dependencies [
+                       [glpk "0.0.12"]
+                       ]}
 )

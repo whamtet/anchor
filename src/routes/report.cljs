@@ -20,7 +20,7 @@
                       :headers {"Content-Type" "application/pdf"
                                 "Content-Disposition"
                                 (util/format
-                                 "Content-Disposition: attachment; filename=\"Anchor Report %s\"" (util/datestamp))
+                                 "Content-Disposition: attachment; filename=\"Anchor Report %s.pdf\"" (util/datestamp))
                                 }
                       :body @report
                       :end-stream? true

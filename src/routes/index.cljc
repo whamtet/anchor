@@ -18,13 +18,13 @@
 
 (defn map-str [f & s] (apply str (interpose "\n" (apply map f s))))
 
+#?(:cljs (def format util/format))
+
 (defn state [class kvs]
   (list
    (map (fn [[k v]] [:input {:type "hidden" :id k :value v}]) kvs)
    [:script (format "%s anchor.%s.main();"
                     (map-str #(format "anchor.core.bind_variable('%s', '%s');" class %) (keys kvs)) class)]))
-
-#?(:cljs (def format util/format))
 
 (defn injectoid
   "a snippet to pump in clojurescript"

@@ -19,7 +19,9 @@
   (promise
    (->
     (.exec child-process
-           "dot -Tsvg"
+           (if (= "darwin" js/process.platform)
+             "dot -Tsvg"
+             "/app/user/dot -Tsvg")
            (fn [err stdout stderr]
              (realise stdout)))
     .-stdin

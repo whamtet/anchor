@@ -2,7 +2,10 @@
   (:require #?(:clj [compojure.core :refer [defroutes GET PUT POST DELETE ANY]])
             [routes.index :as index]
             [anchor.model :as model]
-            [anchor.util :as util]
+            #?(:clj
+               [anchor.util :as util]
+               :cljs
+               [anchor.util :as util :refer [format]])
             [anchor.db :as db]
             #?(:cljs [redlobster.stream :as stream])
             #?(:cljs [redlobster.http :as http])
@@ -97,9 +100,8 @@
   (POST "/new-report" [company year month starting-year starting-month file factor url]
         (let [
               [year month starting-year starting-month]
-              (map #(Integer/parseInt %)
+              (map #(#?(:clj Integer/parseInt :cljs js/Number %) %)
                    [year month starting-year starting-month])
-
               reporting-period (str year " " month)
               outfile (format "resources/public/reports/%s/%s %s.pdf" company year month)
               parent-dir (format "resources/public/reports/%s" company)
@@ -119,6 +121,7 @@
              :cljs
              (do
                (mkdirs parent-dir)
+               (println "url" url)
                (if (some-> url .trim not-empty)
                  (let-realised
                   [res (http/request url)]

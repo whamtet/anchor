@@ -56,26 +56,32 @@
 
 (def final-output (apply clojure.set/difference output (vals dependencies)))
 
+(def safe-model (walk/prewalk #('{/ safe-divide} % %) model))
+
+#?(:cljs
+   (def state (empty-state)))
+
 (defn add-output
   "compute model output"
   [company input-map]
-  (doseq [arg input]
+  #_(doseq [arg input]
     (assert (input-map (str arg)) (str company " " arg)))
   (let [
         defined-vars (set (map symbol (keys input-map)))
-        model (mapcat (fn [[a b]]
-                        (if-not (defined-vars a) [a b]))
-                      (partition 2 model))
+        safe-model (mapcat (fn [[a b]] (if-not (defined-vars a) [a b]))
+                      (partition 2 safe-model))
         code `(let [
-                    {:strs ~(vec defined-vars)} ~input-map
-                    ~@model
+                    ;bind inputs
+                    ~@(mapcat (fn [symbol] [symbol (input-map (str symbol) 0)]) nodes)
+                    ~'safe-divide (fn [& vals#] (if (some zero? vals#) 0 (apply / vals#)))
+                    ~@safe-model
                     output# (zipmap ~(mapv str output) ~(vec output))
                     ]
                 (merge ~input-map output#))
         ]
     #?(:clj (eval code)
        :cljs (promise
-              (eval (empty-state) code {:eval (fn [{:keys [source]}] (js/eval source))} #(realise %)))
+              (eval state code {:eval (fn [{:keys [source]}] (js/eval source))} #(realise %)))
 
      )))
 

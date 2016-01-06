@@ -70,6 +70,4 @@
                  (symzip name share-price shares-outstanding))
               stocks)))))
 
-;;haven't decided how to memoize
-
 (def data2 (#?(:clj memoize :cljs util/memoize-promise) data))

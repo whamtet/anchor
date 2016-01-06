@@ -39,7 +39,7 @@
                            (= "<svg" line-start) [:svg (parse-kv (str line (second todo)))])
               ]
           (cond
-           (.startsWith line-start "</")
+           (string/starts-with? line-start "</")
            (recur (rest todo) (dec i) done)
            (#{"<path" "<polygon" "<ellipse" "<text"} line-start)
            (recur (rest todo) i (nested-conj done i new-element))

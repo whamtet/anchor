@@ -1,8 +1,8 @@
 (ns anchor.web
   (:require ;[dogfort.middleware.routes-macros :refer [defroutes]]
-            ;cljs.nodejs
-            ;[dogfort.middleware.defaults :as defaults]
-            ;dogfort.middleware.routes
+   ;cljs.nodejs
+   ;[dogfort.middleware.defaults :as defaults]
+   ;dogfort.middleware.routes
    [routes.allocation :as allocation]
    [routes.bberg :as bberg]
    [routes.data-entry :as data-entry]
@@ -16,9 +16,9 @@
    [dogfort.middleware.defaults :as defaults]
    [dogfort.http :refer [run-http]]
    anchor.optimize
-            )
+   )
   (:require-macros
-      [dogfort.middleware.routes-macros :refer [defroutes]]))
+   [dogfort.middleware.routes-macros :refer [defroutes]]))
 
 (defroutes routes
   allocation/routes
@@ -34,10 +34,14 @@
   )
 
 (defn main []
-  (println "starting")
-  (-> routes
-      (defaults/wrap-defaults {:wrap-file "resources/public"})
-      (run-http {:port 5000})))
+  (let [
+        port (or js/process.env.PORT 5000)
+        ]
+
+    (println "starting on port" port "on node" js/process.version)
+    (-> routes
+        (defaults/wrap-defaults {:wrap-file "resources/public"})
+        (run-http {:port port}))))
 
 (set! *main-cli-fn* main)
 

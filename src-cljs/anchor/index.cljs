@@ -6,6 +6,7 @@
    [ajax.core :refer [GET POST]]
    [anchor.slideshow :as slideshow]
    [anchor.popups :as popups]
+   [clojure.string :as string]
    )
   )
 
@@ -22,7 +23,7 @@
   ([] (favicon @new-company-website))
   ([url]
    (let [
-         url (if (.startsWith url "http") url (str "http://" url))
+         url (if (string/starts-with? url "http") url (str "http://" url))
          frags (take 3 (.split url "/"))
          ]
      (if (= 3 (count frags))
@@ -256,10 +257,7 @@
      [core/dialog 800 50 slideshow/slide-frame])
    ])
 
-(defn main []
-  ;  (js/$ #(core/snippet dialog "tiantian"))
+(defn ^:export main []
   (core/page content)
-  (core/add-script "/basic-jquery-slider/js/bjqs-1.3.min.js")
-  (core/add-css "/basic-jquery-slider/bjqs.css")
   (core/add-css "/style.css")
   (js/key "escape" #(reset! slideshow/slide nil)))

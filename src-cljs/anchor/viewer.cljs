@@ -13,6 +13,8 @@
 (def menu-status (atom :default))
 (def page-height (atom 700))
 
+(defn ^:export t [] @page-height)
+
 (def import-column (atom 2))
 (def starting-page (atom 66))
 (def ending-page (atom 70))
@@ -41,7 +43,7 @@
   (set! js/PDFViewerApplication.page page))
 
 (defn delay-f
-  "visits page, waits for load then executes"
+  "visits page, waits for load then executes.  Used in Autofill"
   [page f]
   (goto-page page)
   (let [
@@ -218,13 +220,15 @@
             :on-click #(reset! menu-status :default)}]
    ])
 
+(def page-count (js/Function. "return PDFViewerApplication.pagesCount"))
+
 (defn position-div [page-frac negative?]
   [:div {:style {:width 15
                  :height 3
                  :background-color (if negative? "red" "green")
                  :position "fixed"
                  :right 0
-                 :top (* @page-height (/ page-frac js/PDFViewerApplication.pagesCount))}}])
+                 :top (+ 0 (* (- @page-height 0) (/ page-frac (page-count))))}}])
 
 (defn position-divs []
   [:div
@@ -361,7 +365,10 @@
 (defn ^:export main []
   (reset! field (first @params/inputs))
   (js/document.addEventListener "textlayerrendered" text-layer-rendered)
-  (js/$ #(js/loadFile (core/format "/reports/%s/%s.pdf" @params/company @params/reporting-period)))
+  (js/$ #(js/loadFile (core/format "%s/reports/%s/%s.pdf"
+                                   (if (get @params/report-metadata "demo")
+                                     "http://anchor-demo.s3-website-ap-northeast-1.amazonaws.com" "")
+                                   @params/company @params/reporting-period)))
   ;keep this one!
   (.resize (js/$ js/window) set-height!)
   )

@@ -4,9 +4,11 @@
    [anchor.util :as util]
    #?(:cljs [redlobster.promise :as promise])
    #?(:cljs [redlobster.io :as io])
+   #?(:cljs [clojure.string :as string])
    )
-  #?(:require-macros
-     [redlobster.macros :refer [let-realised]])
+  #?(:cljs
+     (:require-macros
+      [redlobster.macros :refer [let-realised promise]]))
   )
 
 ;(defonce s (slurp "http://www.linkreit.com/EN/Pages/default.aspx"))
@@ -26,8 +28,8 @@
         path (.trim path)
         ]
     (cond
-     (.startsWith path "http") path
-     (.startsWith path "/")
+     (string/starts-with? path "http") path
+     (string/starts-with? path "/")
      (join-paths (take 3 (.split url "/")) (rest (.split path "/")))
      :default
      (let [
@@ -51,7 +53,7 @@
         href (find-group #"href=\"(.+?)\"" s)
         ]
     (if (some-> rel (.split " ") last .toLowerCase (= "icon"))
-      (get-images/absolutize url href))))
+      (absolutize url href))))
 
 #?(:clj
    (defn get-icon
@@ -68,11 +70,12 @@
    (defn get-icon
      "Get icon from html <link> metadata"
      [url]
-     (let-realised [s (io/slurp-http url)]
-                   (let [
-                         links (re-seq #"<link .+?>" @s)
-                         icon-url (some #(get-link url %) links)
-                         ]
-                     icon-url))))
-
-(def get-icon2 (memoize get-icon))
+     (let [s (io/slurp url)]
+       (promise/timeout s 10000)
+       (promise
+        (promise/on-realised
+         s
+         #(let [links (re-seq #"<link .+?>" %)
+                icon-url (some (fn [x] (get-link url x)) links)]
+            (realise icon-url))
+         realise)))))

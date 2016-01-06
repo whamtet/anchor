@@ -25,7 +25,9 @@
         (string/replace s to-remove ""))
       value ["," "(" ")"])))
 
-(defn parse-values [values]
+(defn parse-values
+  "parse manually typed values"
+  [values]
   (reduce + (map parse-value (remove empty? (.split values " ")))))
 
 (defn manual-overrides [company reporting-period factor]

@@ -54,6 +54,12 @@
 #?(:cljs
    (cljs.nodejs/enable-util-print!))
 
+(defn str-contains? [a b]
+  #?(:clj
+     (.contains a b)
+     :cljs
+     (not= -1 (.indexOf a b))))
+
 #?(:cljs
    (defn format [s & subs]
      (loop [
@@ -64,12 +70,6 @@
        (if (and (str-contains? s "%s") current)
          (recur (.replace s "%s" current) (first todo) (rest todo))
          s))))
-
-(defn str-contains? [a b]
-  #?(:clj
-     (.contains a b)
-     :cljs
-     (not= -1 (.indexOf a b))))
 
 (def months ["Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec"])
 

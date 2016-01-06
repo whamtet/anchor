@@ -53,7 +53,7 @@
           value (cond
                  (not (number? value)) (str value)
                  (zero? value) 0
-                 (<= (js/Math.log10 (js/Math.abs value)) 2)
+                 (<= (js/Math.log (js/Math.abs value)) 4.605170185988092)
                  (if (integer? value)
                    value
                    (.toFixed value 3))
