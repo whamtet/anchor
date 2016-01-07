@@ -11,6 +11,7 @@
             #?(:cljs [redlobster.http :as http])
             #?(:cljs [redlobster.promise :as promise])
             #?(:cljs [redlobster.io :as io :refer [slurp]])
+            #?(:cljs [redlobster.http :as http])
             )
   #?(:cljs
      (:require-macros
@@ -138,4 +139,10 @@
   (POST "/update-report-metadata2" [company reporting-period report-metadata]
         (db/swap-db "report-metadata" assoc-in [company reporting-period] (util/clean report-metadata))
         util/ok-response)
+  (GET "/route-pdf" [company reporting-period]
+       (let-realised
+        [response (http/request
+                   (format "http://anchor-demo.s3-website-ap-northeast-1.amazonaws.com/reports/%s/%s.pdf" company reporting-period))]
+        {:status 200
+         :body @response}))
   )

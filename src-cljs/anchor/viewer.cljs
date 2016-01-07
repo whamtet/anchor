@@ -365,7 +365,9 @@
 (defn ^:export main []
   (reset! field (first @params/inputs))
   (js/document.addEventListener "textlayerrendered" text-layer-rendered)
-  (js/$ #(js/loadFile (core/format "%s/reports/%s/%s.pdf"
+  (js/$ #(js/loadFile (core/url "/route-pdf" {:company @params/company :reporting-period @params/reporting-period})
+
+          #_(core/format "%s/reports/%s/%s.pdf"
                                    (if (get @params/report-metadata "demo")
                                      "http://anchor-demo.s3-website-ap-northeast-1.amazonaws.com" "")
                                    @params/company @params/reporting-period)))

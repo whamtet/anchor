@@ -11,7 +11,7 @@
   #?(:cljs
      (:require-macros
       [dogfort.middleware.routes-macros :refer [defroutes GET POST ANY]]
-      [redlobster.macros :refer [let-realised]]
+      [redlobster.macros :refer [let-realised if-let-realised]]
       )))
 
 (defroutes routes
@@ -25,6 +25,10 @@
               country-mins (util/clean country-mins)
               country-maxs (util/clean country-maxs)
               ]
-          (#?(:clj util/let-realised :cljs let-realised)
-             [allocation (optimize/optimize country-mins country-maxs stock-max risk-weighting)]
-             (util/pr-response @allocation)))))
+          (println "allocating")
+          #?(:clj
+             (util/pr-response (optimize/optimize country-mins country-maxs stock-max risk-weighting))
+             :cljs
+             (let-realised
+              [allocation (optimize/optimize country-mins country-maxs stock-max risk-weighting)]
+              (util/pr-response @allocation))))))

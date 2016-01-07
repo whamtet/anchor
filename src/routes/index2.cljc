@@ -48,9 +48,9 @@
        (db/dump-db)
        (util/response "dumped"))
   (ANY "/test2" req
-       {:status 200
-        :headers {}
-        :body (pr-str req)})
+       (promise (realise-error "uh oh")))
+  (ANY "/test3" req
+       (pr-str req))
   (GET "/documentation" []
        (util/redirect "http://whamtet.github.io/anchor/"))
   )

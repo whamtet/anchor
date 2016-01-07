@@ -4,8 +4,7 @@
   "dependencies": {
     "ws": "0.8.0",
     "pdfkit": "0.7.2",
-    "busboy": "0.2.12",
-    "glpk": "0.0.12"
+    "busboy": "0.2.12"
   },
   "engines": {
     "node": "2.5.0"

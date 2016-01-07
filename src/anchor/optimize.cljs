@@ -11,8 +11,9 @@
    [redlobster.macros :refer [let-realised promise]]
    ))
 
-(def glp (js/require "glpk"))
+;(def glp (js/require "glpk"))
 (def stream (js/require "stream"))
+(def child-process (js/require "child_process"))
 
 (defn- company->country [s]
   ({"AX" "Australia"
@@ -35,6 +36,9 @@
 (defn apply-spaces [s]
   (apply-interpose " + " s))
 
+(defn apply-commas [s]
+  (apply-interpose ", " s))
+
 (defn constraint-line [constraint-i factors bound]
   (util/format
    "s.t. c%s: %s <= %s;"
@@ -49,6 +53,13 @@
   (doto (stream.Readable.)
     (.push s)
     (.push nil)))
+
+(defn parse-results [s]
+  (let [
+        lines (.split s "\n")
+        lines (butlast (rest (drop-while #(not (.startsWith % "Display statement at line")) lines)))
+        ]
+    (map #(js/Number (second (.split % " = "))) lines)))
 
 (defn optimize
   "Allocate stocks by maximizing a linear multivariate function subject to constraints."
@@ -106,12 +117,14 @@
                               (constraint-line constraint-i (zipmap (map company-order companies) (repeat 1)) (country-maxs country)))
                             (range (+ 2 n n nc) (+ 2 n n nc nc)) grouped-companies)
 
-                       suffix ["solve;" "end;"]
+                       display (util/format "display %s;" (apply-commas (map #(str "x" %) (range n))))
+
+                       suffix ["solve;" display "end;"]
 
                        s (apply-interpose "\n" (concat declarations objective normality lower-bounds upper-bounds lower-country upper-country suffix))
 
-                       lp (glp.Problem.)
-                       mpl (glp.Mathprog.)
+;                       lp (glp.Problem.)
+;                       mpl (glp.Mathprog.)
 
                        temp-file (str "temp/" (gensym))
 
@@ -119,7 +132,13 @@
                    (let-realised
                     [_ (io/spit temp-file s)]
                     (promise
-                     (.readModel mpl temp-file 0
+                     (.exec child-process
+                            (str "./glpsol --math ../../" temp-file)
+                            #js{:cwd "glpk-4.57/examples"}
+                            (fn [err stdout stderr]
+                              (realise
+                               (zipmap companies (parse-results stdout)))))
+                     #_(.readModel mpl temp-file 0
                                  (fn [x y]
                                    (.generate mpl nil
                                               (fn []

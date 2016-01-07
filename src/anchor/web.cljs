@@ -14,6 +14,16 @@
    [routes.viewer :as viewer]
    dogfort.middleware.routes
    [dogfort.middleware.defaults :as defaults]
+
+   [dogfort.middleware.file :as file]
+   [dogfort.middleware.params :as params]
+   [dogfort.middleware.keyword-params :as keyword-params]
+   [dogfort.middleware.session :as session]
+   [dogfort.middleware.cookies :as cookies]
+   [dogfort.middleware.edn :as edn]
+   [dogfort.middleware.multipart-params :as multipart-params]
+
+
    [dogfort.http :refer [run-http]]
    anchor.optimize
    )

@@ -47,7 +47,7 @@
            quotes (apply str (interpose "," stocks))
            ]
        (let-realised [
-                      s (io/slurp-http (util/format fmt-str quotes))
+                      s (io/slurp (util/format fmt-str quotes))
                       ]
                      (let [
                            csv (parse-csv (.trim @s))
