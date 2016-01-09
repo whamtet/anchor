@@ -6,6 +6,7 @@
    [anchor.util :as util]
    redlobster.promise
    [redlobster.io :as io]
+   [clojure.string :as string]
    )
   (:require-macros
    [redlobster.macros :refer [let-realised promise]]
@@ -123,8 +124,8 @@
 
                        s (apply-interpose "\n" (concat declarations objective normality lower-bounds upper-bounds lower-country upper-country suffix))
 
-;                       lp (glp.Problem.)
-;                       mpl (glp.Mathprog.)
+                       ;                       lp (glp.Problem.)
+                       ;                       mpl (glp.Mathprog.)
 
                        temp-file (str "temp/" (gensym))
 
@@ -137,16 +138,17 @@
                             #js{:cwd "glpk-4.57/examples"}
                             (fn [err stdout stderr]
                               (realise
-                               (zipmap companies (parse-results stdout)))))
+                               (if-not (string/includes? stdout "PROBLEM HAS NO PRIMAL FEASIBLE SOLUTION")
+                                 (zipmap companies (parse-results stdout))))))
                      #_(.readModel mpl temp-file 0
-                                 (fn [x y]
-                                   (.generate mpl nil
-                                              (fn []
-                                                (.buildProb mpl lp
-                                                            (fn []
-                                                              (.simplex lp #js{:presolve (.-ON glp)}
-                                                                        (fn []
-                                                                          (let [out (doall (map #(.getColPrim lp %) (range 1 n)))]
-                                                                            (.delete lp)
-                                                                            (.delete mpl)
-                                                                            (realise (zipmap companies out)))))))))))))))))
+                                   (fn [x y]
+                                     (.generate mpl nil
+                                                (fn []
+                                                  (.buildProb mpl lp
+                                                              (fn []
+                                                                (.simplex lp #js{:presolve (.-ON glp)}
+                                                                          (fn []
+                                                                            (let [out (doall (map #(.getColPrim lp %) (range 1 n)))]
+                                                                              (.delete lp)
+                                                                              (.delete mpl)
+                                                                              (realise (zipmap companies out)))))))))))))))))

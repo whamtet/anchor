@@ -16,5 +16,3 @@
 
 (defn main []
   (core/page content))
-
-(POST "/test2" {:params {:p 3}})

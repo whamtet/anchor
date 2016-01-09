@@ -68,48 +68,49 @@
 
 (defn sector-table []
   [:table
-    [:thead
-     [:tr
-      [:th "Sector"] [:th "Cap Rate %"]]]
-    [:tbody
-     (for [[sector cap-rate] (sort-by first @params/economic-sectors)]
-       ^{:key sector}
-       [:tr
-        [:td sector]
-        [:td
-         [:input {:type "number"
-                  :default-value cap-rate
-                  :on-blur #(do
-                              (swap! params/economic-sectors assoc sector (-> % .-target .-value js/Number))
-                              (POST "/update-economic-sectors" {:params {:economic-sectors @params/economic-sectors}}))
-                  }]]
-        [:td
-         [:input {:type "button"
-                  :value "X"
-                  :on-click #(if-let [company (some (fn [[company sectors]]
-                                                      (if (get sectors sector) company)) @params/company-sectors)]
-                               (js/alert (core/format "Remove %s from %s first." sector company))
-                               (do
-                                 (swap! params/economic-sectors dissoc sector)
-                                 (POST "/update-economic-sectors" {:params {:economic-sectors @params/economic-sectors}})))}]]
-        ])
-     [:tr
-      [:td
-       [:input {:type "text"
-                :value @new-sector
-                :on-change #(reset! new-sector (-> % .-target .-value))}]]
-      [:td
-       [:input {:type "number"
-                :value @new-cap-rate
-                :on-change #(reset! new-cap-rate (-> % .-target .-value))}]]
-      [:td
-       [:input {:type "button"
-                :value "Create"
-                :on-click #(when (and (not= "" @new-sector) (not= 0 @new-cap-rate))
-                             (swap! params/economic-sectors assoc @new-sector (js/Number @new-cap-rate))
-                             (reset! new-sector "")
-                             (reset! new-cap-rate 0)
-                             (POST "/update-economic-sectors" {:params {:economic-sectors @params/economic-sectors}}))}]]]]])
+   [:thead
+    [:tr
+     [:th "Sector"] [:th "Cap Rate %"]]]
+   [:tbody
+    (for [[sector cap-rate] (sort-by first @params/economic-sectors)]
+      ^{:key sector}
+      [:tr
+       [:td sector]
+       [:td
+        [:input {:type "number"
+                 :default-value cap-rate
+                 :on-blur #(do
+                             (swap! params/economic-sectors assoc sector (-> % .-target .-value js/Number))
+                             (POST "/update-economic-sectors" {:params {:economic-sectors @params/economic-sectors}}))
+                 }]]
+       (if (not= sector "General")
+         [:td
+          [:input {:type "button"
+                   :value "X"
+                   :on-click #(if-let [company (some (fn [[company sectors]]
+                                                       (if (get sectors sector) company)) @params/company-sectors)]
+                                (js/alert (core/format "Remove %s from %s first." sector company))
+                                (do
+                                  (swap! params/economic-sectors dissoc sector)
+                                  (POST "/update-economic-sectors" {:params {:economic-sectors @params/economic-sectors}})))}]])
+       ])
+    [:tr
+     [:td
+      [:input {:type "text"
+               :value @new-sector
+               :on-change #(reset! new-sector (-> % .-target .-value))}]]
+     [:td
+      [:input {:type "number"
+               :value @new-cap-rate
+               :on-change #(reset! new-cap-rate (-> % .-target .-value))}]]
+     [:td
+      [:input {:type "button"
+               :value "Create"
+               :on-click #(when (and (not= "" @new-sector) (not= 0 @new-cap-rate))
+                            (swap! params/economic-sectors assoc @new-sector (js/Number @new-cap-rate))
+                            (reset! new-sector "")
+                            (reset! new-cap-rate 0)
+                            (POST "/update-economic-sectors" {:params {:economic-sectors @params/economic-sectors}}))}]]]]])
 
 (defn content []
   [:div

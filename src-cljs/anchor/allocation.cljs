@@ -68,20 +68,27 @@
    [:td (.toFixed weighting 2)]])
 
 (defn results []
-  (if @results-atom
-    [:div
-     [:h3 "Allocation"]
-     [:h4 "Portfolio Minimises Discount to Fair Value + Leverage * Risk Weighting"]
-     [:table
-      [:tbody
-       (for [[company weighting] @results-atom]
-         ^{:key company}
-         [results-row company weighting])]]
-     ]
-    [:div]))
+  (cond
+   (map? @results-atom)
+   [:div
+    [:h3 "Allocation"]
+    [:h4 "Portfolio Minimises Discount to Fair Value + Leverage * Risk Weighting"]
+    [:table
+     [:tbody
+      (for [[company weighting] @results-atom]
+        ^{:key company}
+        [results-row company weighting])]]
+    ]
+   (keyword? @results-atom)
+   [:div
+    [:h3 "Infeasable Constraints, please Adjust"]]
+   :default
+   [:div]))
 
 (defn content []
   [:div
+   [:h2 "Stock Allocation"]
+   [:p "Use the model to allocate stocks subject to constraints below."]
    [country-bounds]
    [stock-max-row]
    [risk-row]
@@ -92,7 +99,7 @@
                                                    :stock-max @stock-max
                                                    :risk-weighting @risk-weighting
                                                    }
-                                          :handler (fn [x] (reset! results-atom x))
+                                          :handler (fn [x] (reset! results-atom (or x :impossible)))
                                           :error-handler prn})
             }
     ]

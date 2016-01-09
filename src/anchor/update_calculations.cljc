@@ -77,7 +77,7 @@
 
 (defn cap-rate [company]
   (let [
-        proportion (get (db/get-db "company-sectors") company)
+        proportion (get (db/get-db "company-sectors") company {"General" 100})
         ]
     (/
      (reduce + (map (fn [[sector proportion]] (* proportion (get (db/get-db "economic-sectors") sector))) proportion))

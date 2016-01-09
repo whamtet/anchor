@@ -53,4 +53,7 @@
        (pr-str req))
   (GET "/documentation" []
        (util/redirect "http://whamtet.github.io/anchor/"))
+
+  (GET "/hello-world" [name]
+       (str "Hello " name))
   )

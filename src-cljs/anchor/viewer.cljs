@@ -12,6 +12,7 @@
 (def field (atom nil))
 (def menu-status (atom :default))
 (def page-height (atom 700))
+(def show-menu? (atom true))
 
 (defn ^:export t [] @page-height)
 
@@ -241,40 +242,42 @@
      [position-div page-frac negative?])])
 
 (defn content []
-  [:div
-   {:style {:background-color "white"
-            :width "18%"
-            :z-index 100000
-            :position "relative"
-            :padding 7
-            }}
-   [position-divs]
-   [:h3 @params/company]
-   (condp = @menu-status
-     :metadata
-     [metadata-form]
-     :import
-     [import-form]
-     :default
-     [:div
-      [:br]
-      [:input {:type "button"
-               :value "Show Metadata"
-               :on-click #(reset! menu-status :metadata)}]
-      [:br]
-      [:input {:type "button"
-               :value "Autofill"
-               :on-click #(reset! menu-status :import)}]
-      [popups/popup 0]
-      [popups/popup 1]
-      ])
-   [:br]
-   [:table
-    [:thead]
-    [:tbody
-     (for [input @params/inputs]
-       ^{:key input}
-       [field-row input])]]])
+  (if @show-menu?
+    [:div
+     {:style {:background-color "white"
+              :width "18%"
+              :z-index 100000
+              :position "relative"
+              :padding 7
+              }}
+     [position-divs]
+     [:h3 @params/company]
+     (condp = @menu-status
+       :metadata
+       [metadata-form]
+       :import
+       [import-form]
+       :default
+       [:div
+        [:br]
+        [:input {:type "button"
+                 :value "Show Metadata"
+                 :on-click #(reset! menu-status :metadata)}]
+        [:br]
+        [:input {:type "button"
+                 :value "Autofill"
+                 :on-click #(reset! menu-status :import)}]
+        [popups/popup 0]
+        [popups/popup 1]
+        ])
+     [:br]
+     [:table
+      [:thead]
+      [:tbody
+       (for [input @params/inputs]
+         ^{:key input}
+         [field-row input])]]]
+    [:div]))
 
 (defn click-div [page element-num subelement-num word event]
   (let [
@@ -300,10 +303,10 @@
      (swap! params/report-values assoc-in [@field (str page) (str element-num) (str subelement-num) "negative?"] true)
      :default
      (swap! params/report-values assoc-in [@field (str page) (str element-num) (str subelement-num)] {
-                                                                                               "value" word "negative?" false
-                                                                                               "left-text" left-text
-                                                                                               "page-frac" page-frac
-                                                                                               }))
+                                                                                                      "value" word "negative?" false
+                                                                                                      "left-text" left-text
+                                                                                                      "page-frac" page-frac
+                                                                                                      }))
     (update-report-values)
     ))
 
@@ -365,13 +368,11 @@
 (defn ^:export main []
   (reset! field (first @params/inputs))
   (js/document.addEventListener "textlayerrendered" text-layer-rendered)
-  (js/$ #(js/loadFile (core/url "/route-pdf" {:company @params/company :reporting-period @params/reporting-period})
-
-          #_(core/format "%s/reports/%s/%s.pdf"
-                                   (if (get @params/report-metadata "demo")
-                                     "http://anchor-demo.s3-website-ap-northeast-1.amazonaws.com" "")
-                                   @params/company @params/reporting-period)))
+  (js/$ #(js/loadFile (if (get @params/report-metadata "demo")
+                        (core/url "/route-pdf" {:company @params/company :reporting-period @params/reporting-period})
+                        (core/format "/reports/%s/%s.pdf" @params/company @params/reporting-period))))
   ;keep this one!
   (.resize (js/$ js/window) set-height!)
+  (js/key ";" #(swap! show-menu? not))
   )
 
