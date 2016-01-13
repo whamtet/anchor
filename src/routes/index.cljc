@@ -37,7 +37,8 @@
      [:div {:id "content"}]
      [:script {:src "/keymaster.js"}]
      [:script {:src "/jquery.js"}]
-     [:script {:src "/cljs/out/goog/base.js"}]
+     (if-not util/linux?
+       [:script {:src "/cljs/out/goog/base.js"}])
      [:script {:src "/cljs/out.js"}]
      (for [script scripts]
        [:script {:src script}])

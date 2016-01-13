@@ -45,6 +45,7 @@
                                          "automatic_input" (pr-str (set (map str model/automatic-input)))
                                          "manual_input" (pr-str (set (map str model/manual-input)))
                                          "final_output" (pr-str (set (map str model/final-output)))
+                                         "nodes" (pr-str (map str model/nodes))
                                          "values" (pr-str (get @nums company))
                                          "manual_values" (pr-str (get (db/get-db "manual-values") company))
                                          "company" (pr-str company)

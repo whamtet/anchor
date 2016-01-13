@@ -242,6 +242,10 @@
 
 (defn content []
   [:div
+   ;;preload for speed
+   (for [i (range 1 5)]
+     ^{:key i}
+     [:img {:src (core/format "/tour/%s.png" i) :style {:display "none"}}])
    (for [yahoo-id (mapcat sort (vals (group-by #(-> % (.split ".") second) (keys @params/company-metadata))))]
      ^{:key yahoo-id}
      [company-div yahoo-id])

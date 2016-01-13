@@ -21,6 +21,9 @@
   (and (string/includes? user-agent "MSIE")
        (not (some #(string/includes? user-agent %) ["MSIE 10" "MSIE 11"]))))
 
+(defn mobile? [{:strs [user-agent]}]
+  (string/includes? user-agent "Mobile"))
+
 (defroutes routes
   (GET "/" {:keys [session headers]}
        (if (old-ie? headers)

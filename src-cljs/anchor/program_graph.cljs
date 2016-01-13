@@ -9,6 +9,12 @@
    [clojure.string :as string]
    ))
 
+(def field (atom nil))
+(def positions (cljs.core/atom nil))
+
+(def mobile-safari? (let [s js/window.navigator.userAgent]
+                      (and (string/includes? s "Mobile") (string/includes? s "Safari"))))
+
 (defn subitem? [a b]
   (cond
    (and (map? a) (map? b))
@@ -68,11 +74,10 @@
                  (@params/manual-input field) "Data Entry"
                  :default "Calculated"))
           ]
-      [:g (assoc m-g :on-click on-click) ;[:title (@equations text1)]
+
+      [:g (assoc m-g :on-click on-click :style {:pointer-events "all"} :id field) ;[:title (@equations text1)]
        [:ellipse (assoc m-ellipse :fill fill)] [:text m-text1 text1] [:text m-text2 value]])
     item))
-
-(def field (atom nil))
 
 (defn close-dialog []
   (let [
@@ -83,6 +88,7 @@
     (reset! field nil)))
 
 (defn open-dialog [phield]
+  (println "opening" phield)
   (reset! field phield))
 
 (defn dialog []
@@ -90,7 +96,8 @@
         value (get @params/manual-values @field)
         title (string/replace @field "-" " ")
         ]
-    [:div
+    (println "okok")
+    [:div {:id "dialog"}
      [:b title]
      [:div
       [:input {:type "radio" :name "rad" :checked (not value) :on-change #(swap! params/manual-values dissoc @field)}] "Default" [:br]
@@ -98,19 +105,65 @@
       [:input {:type "number" :value (or value "") :on-change #(swap! params/manual-values assoc @field (-> % .-target .-value))}] [:br]
       [:input {:type "button" :on-click close-dialog :value "Close"}]]]))
 
+#_(defn dialog-wrapper [[left top]]
+  [:div {:style {
+                 :position "fixed"
+                 :left 0
+                 :top 0
+                 :width "100%"
+                 :height "100%"
+                 :background-color "rgba(236, 237, 237, 0.8)"
+                 :z-index 1000
+                 }}
+   [:div {:style {
+                  :width 200
+;                  :margin-left left
+;                  :margin-top top
+;                  :margin "200px auto"
+                  :position "relative"
+                  :left left
+                  :top top
+                  :background-color "white"
+                  :border "1px solid black"
+                  :padding 15
+                  :text-align "center"
+                  }
+          :id "dialog"
+          }
+    [dialog]]])
+
 (defn content []
   (let [
         svg (walk/postwalk clean-vector @params/graph)
-        svg (assoc-in svg [1 :viewBox] "300 0.00 3000 1100")
+        svg (update-in svg [1] merge {:viewBox "0 0 2200 700" :width nil :height nil})
         ]
+    (println (get svg 1))
     [:div
      [popups/popup 0]
      legend
      (if @field
-       [core/dialog 200 200 dialog])
+       #_[dialog-wrapper (@positions @field)]
+       [core/dialog 200 200 dialog]
+       )
      svg
      ]))
 
+(defn print-widths [element]
+  (when element
+    (println (.width (js/$ element)))
+    (recur (.-parentElement element))))
+
 (defn ^:export main []
+  (core/add-css "/style.css")
   (core/page
-   content))
+   content)
+  (if mobile-safari?
+    (doseq [node @params/nodes]
+      (set! (.-onclick (js/document.getElementById node)) (fn []))))
+  (reset! positions
+          (into {}
+                (for [node @params/nodes]
+                  (let [
+                        offset (.offset (js/$ (str "#" node)))
+                        ]
+                    [node [(.-left offset) (.-top offset)]])))))

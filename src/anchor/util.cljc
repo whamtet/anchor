@@ -13,6 +13,8 @@
      (:require-macros
       [anchor.util :as util])))
 
+(def linux? #?(:cljs (= "linux" js/process.platform)))
+
 (defn cumul [s]
   (reduce (fn [v i]
             (conj v (+ (peek v) i))) [(first s)] (rest s)))

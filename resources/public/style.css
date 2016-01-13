@@ -10,3 +10,7 @@
 .network-link:hover {
   background-image: url(../network2.png);
 }
+/*
+svg {
+  pointer-events: all;
+} */
