@@ -24,20 +24,24 @@
                  [jayq "2.5.1"]
                  [cljs-ajax "0.2.6"]
                  [reagent "0.5.1" :exclusions [com.google.javascript/closure-compiler
-                                               org.clojure/google-closure-library
-                                               ]]
+                                               org.clojure/google-closure-library]]
                  [clj-pdf "2.1.6"]
 
                  ;;hiccups
                  [org.clojars.whamtet/hiccups "0.4.0-SNAPSHOT"]
 
                  ;;dogfort
-                 [dogfort "0.2.0-SNAPSHOT" :exclusions [org.clojure/clojurescript
+                 [dogfort "0.2.2-SNAPSHOT" :exclusions [org.clojure/clojurescript
                                                         com.google.javascript/closure-compiler
                                                         org.clojure/google-closure-library
                                                         ]]
                  [cljs-pdfkit "0.1.0-SNAPSHOT" :exclusions [org.clojure/clojurescript]]
-                 ]
+
+                 ;extra dependencies for java 11
+                 [javax.xml.bind/jaxb-api "2.2.11"]
+                 [com.sun.xml.bind/jaxb-core "2.2.11"]
+                 [com.sun.xml.bind/jaxb-impl "2.2.11"]
+                 [javax.activation/activation "1.1.1"]]
   :min-lein-version "2.0.0"
   :plugins [[environ/environ.lein "0.2.1"]
             [lein-npm "0.6.1"]
@@ -45,7 +49,7 @@
   :hooks [environ.leiningen.hooks]
   :uberjar-name "anchor-standalone.jar"
   :profiles {:production {:env {:production true}}}
-  :jvm-opts ["-Djava.awt.headless=true"]
+  :jvm-opts ["-Djava.awt.headless=true" ]
   :aliases
   {"build" ["trampoline" "run" "-m" "scripts.compile-cljs"]
    "build-once" ["trampoline" "run" "-m" "scripts.compile-cljs" "true"]
