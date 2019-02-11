@@ -135,7 +135,7 @@
                     (promise
                      (.exec child-process
                             (str "./glpsol --math ../../" temp-file)
-                            #js{:cwd "glpk-4.57/examples"}
+                            #js {:cwd "glpk-4.57/examples"}
                             (fn [err stdout stderr]
                               (realise
                                (if-not (string/includes? stdout "PROBLEM HAS NO PRIMAL FEASIBLE SOLUTION")
