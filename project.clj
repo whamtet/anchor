@@ -28,7 +28,7 @@
                  [clj-pdf "2.1.6"]
 
                  ;;hiccups
-                 [org.clojars.whamtet/hiccups "0.4.0-SNAPSHOT"]
+                 [org.clojars.whamtet/hiccups "0.4.1"]
 
                  ;;dogfort
                  [dogfort "0.2.2-SNAPSHOT" :exclusions [org.clojure/clojurescript
