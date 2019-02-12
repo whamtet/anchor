@@ -1,4 +1,10 @@
-FROM whamtet/nodejs
+FROM node:6
+ADD package.json package.json
+RUN yarn install
+COPY glpk-4.65 /app/user/glpk-4.65
+WORKDIR /app/user
+RUN cd glpk-4.65 && ./configure && make
+RUN yarn global add supervisor
 
 COPY out /app/user/out
 COPY main.js /app/user/main.js
