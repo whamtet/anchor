@@ -19,9 +19,5 @@ COPY resources/500.html /app/user/resources/500.html
 COPY resources/bberg.txt /app/user/resources/bberg.txt
 COPY resources/db.edn /app/user/resources/db.edn
 COPY linux-dot /app/user/dot
-COPY glpk-4.57 /app/user/glpk-4.57
 COPY temp/G__1340 /app/user/lp.txt
 COPY temp/G__1340 /app/user/temp/G__1340
-
-WORKDIR /app/user
-RUN cd glpk-4.57 && make clean && ./configure && make
