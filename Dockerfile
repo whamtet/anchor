@@ -6,7 +6,6 @@ WORKDIR /app/user
 RUN cd glpk-4.65 && ./configure && make
 RUN yarn global add supervisor
 
-COPY out /app/user/out
 COPY main.js /app/user/main.js
 COPY resources/public/cljs /app/user/resources/public/cljs
 COPY resources/public/pdf.js /app/user/resources/public/pdf.js

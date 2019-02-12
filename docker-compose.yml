@@ -1,8 +1,12 @@
-web:
-  build: .
-  command: 'bash -c ''node main.js'''
-  working_dir: /app/user
-  environment:
-    PORT: 8080
-  ports:
-    - '8080:8080'
+version: '3'
+services:
+  web:
+    build: './'
+    command: 'bash -c ''supervisor main.js'''
+    working_dir: /app/user
+    environment:
+      PORT: 8080
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./out:/app/user/out
