@@ -31,7 +31,7 @@
                  [org.clojars.whamtet/hiccups "0.4.1"]
 
                  ;;dogfort
-                 [dogfort "0.2.2-SNAPSHOT" :exclusions [org.clojure/clojurescript
+                 [dogfort "0.2.3" :exclusions [org.clojure/clojurescript
                                                         com.google.javascript/closure-compiler
                                                         org.clojure/google-closure-library
                                                         ]]
