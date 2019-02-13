@@ -24,11 +24,7 @@ launch from the command line:
 
     $ lein run -m anchor.web
 
-To run with node you must first install the npm (node package manager) dependencies.
-
-    $ lein npm install
-
-next build the server side clojurescript
+To run with node build the server side clojurescript
 
     $ lein build-node
 
