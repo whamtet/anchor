@@ -28,9 +28,9 @@ To run with node build the server side clojurescript
 
     $ lein build-node
 
-finally launch the server
+then launch with docker
 
-    $ node main.js
+    $ docker-compose up
 
 For more information please see the [User Guide](http://whamtet.github.io/anchor).
 
