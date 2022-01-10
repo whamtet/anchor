@@ -3,7 +3,7 @@
   (:require [clojure.walk :as walk]
             clojure.set
             #?(:cljs [cljs.js :refer [eval empty-state]])
-            redlobster.promise
+            #?(:cljs redlobster.promise)
             )
   #?(:cljs
      (:require-macros [redlobster.macros :refer [promise]]))

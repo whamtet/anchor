@@ -29,7 +29,7 @@
        (Long/parseLong s)
        (catch Throwable t
          (try
-           (Double/parseDoubles)
+           (Double/parseDouble s)
            (catch Throwable t
              (string/replace s "\"" "")))))))
 
@@ -67,7 +67,7 @@
              m (util/map-by second csv)
              ]
          (map #(let [[name symbol share-price shares-outstanding] (m %)]
-                 (symzip name share-price shares-outstanding))
+                 (util/symzip name share-price shares-outstanding))
               stocks)))))
 
 (def data2 (#?(:clj memoize :cljs util/memoize-promise) data))
