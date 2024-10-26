@@ -4,6 +4,7 @@
    [routes.index :as index]
    [anchor.db :as db]
    [anchor.util :as util]
+   #?(:clj [anchor.util :refer [let-realised]])
    [anchor.optimize :as optimize]
    [clojure.string :as string]
    #?(:cljs [redlobster.promise :as promise])
@@ -29,7 +30,7 @@
        (if (old-ie? headers)
          "Internet Explorer 9 and Below Not Supported.  Please Upgrade"
          (let-realised
-          [s (io/slurp "resources/public/toast/index.html")]
+          [s (#?(:cljs io/slurp :clj slurp) "resources/public/toast/index.html")]
           {:status 200
            :headers {"Content-Type" "text/html; charset=utf-8"}
            :body
@@ -47,11 +48,6 @@
          :body "ok"
          :session (conj (if (set? session) session #{}) endpoint)})
   (GET "/test" [] (index/page ["test"] {}))
-  (GET "/dump-db" []
-       (db/dump-db)
-       (util/response "dumped"))
-  (ANY "/test2" req
-       (promise (realise-error "uh oh")))
   (ANY "/test3" req
        (pr-str req))
   (GET "/documentation" []

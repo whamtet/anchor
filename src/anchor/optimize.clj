@@ -1,6 +1,5 @@
 (ns anchor.optimize
-  ^{:doc "Use JOptimize to allocate stocks"}
-  )
+  "Use JOptimize to allocate stocks")
 
 (require '[anchor.update-calculations :as update-calculations])
 (require '[anchor.util :as util])

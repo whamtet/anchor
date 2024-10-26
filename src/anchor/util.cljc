@@ -47,7 +47,7 @@
      (defn rebind [bindings]
        (vec (mapcat
         (fn [[k v]]
-          [k `(SimpleRef. ~v)])
+          [k `(anchor.util.SimpleRef. ~v)])
         (partition 2 bindings))))
      (defmacro let-realised [bindings & forms]
        `(let ~(rebind bindings)

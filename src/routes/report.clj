@@ -4,7 +4,8 @@
             [anchor.db :as db]
             [anchor.util :as util]
             [anchor.update-calculations :as update-calculations]
-;            [pdf.report :as report]
+            [clojure.java.io :as io]
+            [clojure.java.shell :as shell]
             )
   )
 
@@ -13,10 +14,6 @@
               out (java.io.ByteArrayOutputStream.)]
     (io/copy in out)
     (.toByteArray out)))
-
-(require '[clojure.java.io :as io])
-(require '[ring.util.response :as response])
-(require '[clojure.java.shell :as shell])
 
 (import java.io.File)
 (import java.util.Calendar)

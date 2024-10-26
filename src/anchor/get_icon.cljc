@@ -4,7 +4,7 @@
    [anchor.util :as util]
    #?(:cljs [redlobster.promise :as promise])
    #?(:cljs [redlobster.io :as io])
-   #?(:cljs [clojure.string :as string])
+   [clojure.string :as string]
    )
   #?(:cljs
      (:require-macros

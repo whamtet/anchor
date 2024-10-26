@@ -3,6 +3,7 @@
             [routes.index :as index]
             [anchor.db :as db]
             [anchor.util :as util]
+            #?(:clj [anchor.util :refer [defupdate symzip]])
             [anchor.get-icon :as get-icon]
             #?(:cljs redlobster.promise)
             )

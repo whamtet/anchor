@@ -18,7 +18,6 @@
             [routes.bberg :as bberg]
             [routes.viewer :as viewer]
             [routes.allocation :as allocation]
-            [anchor.compile-cljs :as compile-cljs]
             ))
 
 (defroutes app
@@ -53,7 +52,7 @@
         )))
 
 (defn -main [& args]
-  (let [port 5000]
+  (let [port 3000]
     (jetty/run-jetty (wrap-app #'app2) {:port port :join? false})))
 
 ;; For interactive development:

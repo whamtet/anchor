@@ -6,7 +6,7 @@
             [anchor.util :as util]
             [anchor.optimize :as optimize]
             [anchor.yahoo :as yahoo]
-            redlobster.promise
+            #?(:cljs redlobster.promise)
             )
   #?(:cljs
      (:require-macros
