@@ -4,8 +4,6 @@
 
 Value Investor Portfolio Management Suite
 
-[Demo](http://www.anchor-demo.net)
-
 [User Guide](http://whamtet.github.io/anchor)
 
 ## Building
